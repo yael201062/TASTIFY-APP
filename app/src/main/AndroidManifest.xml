@@ -24,7 +24,7 @@
         </activity>
 
         <activity
-            android:name=".ui.auth.RegisterActivity"
+            android:name=".ui.auth.RegisterFragment"
             android:exported="true"
             android:theme="@style/Theme.TASTIFY" />
 

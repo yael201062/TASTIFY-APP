@@ -9,11 +9,11 @@ import androidx.appcompat.app.AppCompatActivity
 import com.example.tastify.MainActivity
 import com.example.tastify.R
 
-class RegisterActivity : AppCompatActivity() {
+class RegisterFragment : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_register)
+        setContentView(R.layout.fragment_register)
 
         val etName = findViewById<EditText>(R.id.etName)
         val etEmail = findViewById<EditText>(R.id.etEmail)
@@ -28,7 +28,7 @@ class RegisterActivity : AppCompatActivity() {
             if (name.isEmpty() || email.isEmpty() || password.isEmpty()) {
                 Toast.makeText(this, "אנא מלא את כל השדות", Toast.LENGTH_SHORT).show()
             } else {
-                // לאחר ההרשמה, ניתן להעביר את המשתמש למסך הראשי
+
                 val intent = Intent(this, MainActivity::class.java)
                 startActivity(intent)
                 finish()
