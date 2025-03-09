@@ -4,22 +4,47 @@
     xmlns:tools="http://schemas.android.com/tools"
     app:startDestination="@id/loginFragment">
 
-    <!-- הגדרת ה-LoginFragment -->
+    <!-- מסך התחברות -->
     <fragment
         android:id="@+id/loginFragment"
         android:name="com.example.tastify.ui.auth.LoginFragment"
         android:label="Login"
         tools:layout="@layout/fragment_login">
-        <!-- פעולה להמיר את הניווט מ-loginFragment ל-homeFragment -->
+
+        <!-- ניווט מהתחברות למסך הבית -->
         <action
             android:id="@+id/action_loginFragment_to_homeFragment"
             app:destination="@id/homeFragment" />
+
+        <!-- ניווט מהתחברות למסך הרשמה -->
+        <action
+            android:id="@+id/action_loginFragment_to_registerFragment"
+            app:destination="@id/registerFragment" />
     </fragment>
 
-    <!-- הגדרת ה-HomeFragment -->
+    <!-- מסך הרשמה -->
+    <fragment
+        android:id="@+id/registerFragment"
+        android:name="com.example.tastify.ui.auth.RegisterFragment"
+        android:label="Register"
+        tools:layout="@layout/fragment_register">
+
+        <!-- ניווט מהרשמה למסך הבית -->
+        <action
+            android:id="@+id/action_registerFragment_to_homeFragment"
+            app:destination="@id/homeFragment" />
+
+        <!-- ניווט חזרה מההרשמה להתחברות -->
+        <action
+            android:id="@+id/action_registerFragment_to_loginFragment"
+            app:destination="@id/loginFragment" />
+    </fragment>
+
+    <!-- מסך הבית -->
     <fragment
         android:id="@+id/homeFragment"
         android:name="com.example.tastify.ui.home.HomeFragment"
         android:label="Home"
         tools:layout="@layout/fragment_home" />
+
 </navigation>
