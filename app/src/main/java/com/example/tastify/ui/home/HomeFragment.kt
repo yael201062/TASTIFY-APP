@@ -9,15 +9,14 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.tastify.databinding.FragmentHomeBinding
+import com.example.tastify.viewmodel.PostViewModel
 
 class HomeFragment : Fragment() {
 
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
 
-    private val restaurantViewModel: RestaurantViewModel by viewModels()
     private val postViewModel: PostViewModel by viewModels()
-
     private lateinit var postAdapter: PostAdapter
 
     override fun onCreateView(
@@ -31,29 +30,25 @@ class HomeFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // הגדרת RecyclerView לפוסטים
         postAdapter = PostAdapter()
         binding.rvPosts.layoutManager = LinearLayoutManager(requireContext())
         binding.rvPosts.adapter = postAdapter
 
-        // צפייה בנתונים מה-PostViewModel
         postViewModel.posts.observe(viewLifecycleOwner) { posts ->
             postAdapter.setPosts(posts)
         }
 
-        // חיפוש מסעדות
         binding.btnSearch.setOnClickListener {
             val query = binding.etSearch.text.toString()
             if (query.isNotEmpty()) {
-                restaurantViewModel.searchRestaurants(query)
+                Toast.makeText(requireContext(), "Searching for: $query", Toast.LENGTH_SHORT).show()
             } else {
                 Toast.makeText(requireContext(), "Please enter a search term", Toast.LENGTH_SHORT).show()
             }
         }
 
-        // כפתור התנתקות - להוסיף לוגיקה אם יש
         binding.btnLogout.setOnClickListener {
-            // TODO: הוסף כאן לוגיקה להתנתקות אם צריך
+            // TODO:
         }
     }
 

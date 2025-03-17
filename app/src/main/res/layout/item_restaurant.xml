@@ -9,7 +9,6 @@
     android:clickable="true"
     android:focusable="true">
 
-    <!-- שם המסעדה -->
 <TextView
 android:id="@+id/tvRestaurantName"
 android:layout_width="0dp"
@@ -22,7 +21,6 @@ app:layout_constraintStart_toStartOf="parent"
 app:layout_constraintEnd_toEndOf="parent"
 tools:text="Sample Restaurant" />
 
-    <!-- דירוג המסעדה -->
 <TextView
 android:id="@+id/tvRestaurantRating"
 android:layout_width="wrap_content"
@@ -35,7 +33,6 @@ app:layout_constraintStart_toStartOf="parent"
 android:layout_marginTop="8dp"
 tools:text="Rating: 4.5" />
 
-    <!-- כתובת המסעדה -->
 <TextView
 android:id="@+id/tvRestaurantAddress"
 android:layout_width="0dp"
@@ -49,7 +46,6 @@ app:layout_constraintEnd_toEndOf="parent"
 android:layout_marginTop="4dp"
 tools:text="123 Main St, City, Country" />
 
-    <!-- כפתור להזמנה -->
 <Button
 android:id="@+id/btnBook"
 android:layout_width="wrap_content"

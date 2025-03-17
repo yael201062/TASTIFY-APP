@@ -1,4 +1,4 @@
-package com.example.tastify.ui.home
+package com.example.tastify.viewmodel
 
 import android.util.Log
 import androidx.lifecycle.LiveData
@@ -12,6 +12,5 @@ class RestaurantViewModel : ViewModel() {
 
     fun searchRestaurants(query: String) {
         Log.d("RestaurantViewModel", "Searching for restaurants with query: $query")
-        // פה תוכל להוסיף לוגיקה אמיתית בעתיד
     }
 }

@@ -31,7 +31,10 @@ class PostAdapter : RecyclerView.Adapter<PostAdapter.PostViewHolder>() {
     class PostViewHolder(private val binding: ItemPostBinding) : RecyclerView.ViewHolder(binding.root) {
         fun bind(post: Post) {
             binding.tvPostUserName.text = post.userName
+            binding.tvRestaurantName.text = post.restaurantName
             binding.tvPostContent.text = post.content
+            binding.ratingBar.rating = post.rating.toFloat()
+
             if (!post.imageUrl.isNullOrEmpty()) {
                 Picasso.get().load(post.imageUrl).into(binding.ivPostImage)
             } else {
