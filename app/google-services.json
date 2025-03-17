@@ -12,7 +12,12 @@
           "package_name": "com.example.tastify"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "1054977427037-vbaaisdf9bcufkuhqrcu4e79sbthrdud.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyBi-UWnu9nWK6DHRgVGIfV44vCWCKGA2Ok"
@@ -20,7 +25,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1054977427037-vbaaisdf9bcufkuhqrcu4e79sbthrdud.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }
