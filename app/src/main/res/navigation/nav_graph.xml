@@ -47,11 +47,41 @@
         android:label="Home"
         tools:layout="@layout/fragment_home" />
 
+    <!-- מסך הוספת ביקורת -->
     <fragment
         android:id="@+id/addReviewFragment"
         android:name="com.example.tastify.ui.addreview.AddReviewFragment"
-    android:label="Add Review"
-    tools:layout="@layout/fragment_add_review" />
+        android:label="Add Review"
+        tools:layout="@layout/fragment_add_review" />
 
+    <!-- מסך פרופיל -->
+    <fragment
+        android:id="@+id/profileFragment"
+        android:name="com.example.tastify.ui.profile.ProfileFragment"
+        android:label="Profile"
+        tools:layout="@layout/fragment_profile">
+
+        <action
+            android:id="@+id/action_profileFragment_to_editProfileFragment"
+            app:destination="@id/editProfileFragment" />
+
+        <action
+            android:id="@+id/action_profileFragment_to_myPostsFragment"
+            app:destination="@id/myPostsFragment" />
+    </fragment>
+
+    <!-- מסך עריכת פרופיל -->
+    <fragment
+        android:id="@+id/editProfileFragment"
+        android:name="com.example.tastify.ui.profile.EditProfileFragment"
+        android:label="Edit Profile"
+        tools:layout="@layout/fragment_edit_profile" />
+
+    <!-- מסך פוסטים של המשתמש -->
+    <fragment
+        android:id="@+id/myPostsFragment"
+        android:name="com.example.tastify.ui.profile.MyPostsFragment"
+        android:label="My Posts"
+        tools:layout="@layout/fragment_my_posts" />
 
 </navigation>
