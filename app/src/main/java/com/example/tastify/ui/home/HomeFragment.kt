@@ -7,7 +7,9 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.tastify.R
 import com.example.tastify.databinding.FragmentHomeBinding
 import com.example.tastify.viewmodel.PostViewModel
 
@@ -41,15 +43,21 @@ class HomeFragment : Fragment() {
         binding.btnSearch.setOnClickListener {
             val query = binding.etSearch.text.toString()
             if (query.isNotEmpty()) {
-                Toast.makeText(requireContext(), "Searching for: $query", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), "מחפש: $query", Toast.LENGTH_SHORT).show()
             } else {
-                Toast.makeText(requireContext(), "Please enter a search term", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), "אנא הכנס מונח חיפוש", Toast.LENGTH_SHORT).show()
             }
         }
 
         binding.btnLogout.setOnClickListener {
-            // TODO:
+            // TODO: הוסף כאן את הלוגיקה ליציאה
         }
+
+        // מאזין לחיצה ל-FAB - ניווט ל-AddReviewFragment
+        binding.fabAddReview.setOnClickListener {
+            findNavController().navigate(R.id.addReviewFragment)
+        }
+
     }
 
     override fun onDestroyView() {

@@ -47,4 +47,10 @@
         android:label="Home"
         tools:layout="@layout/fragment_home" />
 
+    <fragment
+        android:id="@+id/addReviewFragment"
+        android:name="com.example.tastify.ui.addreview.AddReviewFragment"
+        android:label="הוספת ביקורת"
+        tools:layout="@layout/fragment_add_review" />
+
 </navigation>
