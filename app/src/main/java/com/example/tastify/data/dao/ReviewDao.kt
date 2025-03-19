@@ -10,7 +10,7 @@ interface ReviewDao {
     suspend fun insertReview(review: Review)
 
     @Query("SELECT * FROM reviews ORDER BY id DESC")
-    suspend fun getAllReviews(): List<Review>
+    fun getAllReviews(): Flow<List<Review>>
 
     @Query("SELECT * FROM reviews WHERE restaurantId = :restaurantId")
     fun getReviewsByRestaurant(restaurantId: String): Flow<List<Review>>

@@ -16,7 +16,7 @@ import com.example.tastify.data.repository.ReviewRepository
 import androidx.navigation.fragment.findNavController
 import com.example.tastify.databinding.FragmentAddReviewBinding
 import com.example.tastify.databinding.FragmentHomeBinding
-import com.example.tastify.ui.home.ReviewViewModel
+import com.example.tastify.viewmodel.ReviewViewModel
 
 //class AddReviewFragment : Fragment() {
 //
@@ -138,7 +138,7 @@ class AddReviewFragment : Fragment() {
                 rating = binding.ratingBar.rating
             )
 
-            reviewViewModel.insertReview(review)
+            reviewViewModel.addReview(review)
             Log.d("Review", "Inserted review: ${review.comment} with rating: ${review.rating}")
             Toast.makeText(requireContext(), "הביקורת נוספה", Toast.LENGTH_SHORT).show()
         }
