@@ -1,10 +1,17 @@
 package com.example.tastify.data.model
 
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+
+@Entity(tableName = "reviews")
 data class Review(
-    val id: String = "",
+    @PrimaryKey(autoGenerate = true) val id: Int = 0,
     val userId: String = "",
     val restaurantId: String = "",
     val rating: Float = 0.0f,
     val comment: String = "",
     val timestamp: Long = System.currentTimeMillis()
 )
+
+
+

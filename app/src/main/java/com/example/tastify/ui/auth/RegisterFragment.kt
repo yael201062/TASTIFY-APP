@@ -9,11 +9,13 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.example.tastify.R
 import com.example.tastify.databinding.FragmentRegisterBinding
+import com.google.firebase.auth.FirebaseAuth
 
 class RegisterFragment : Fragment() {
 
     private var _binding: FragmentRegisterBinding? = null
     private val binding get() = _binding!!
+    private lateinit var auth: FirebaseAuth  // FirebaseAuth instance
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -26,6 +28,8 @@ class RegisterFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        auth = FirebaseAuth.getInstance()  // Initialize FirebaseAuth
+
         binding.btnRegister.setOnClickListener {
             val name = binding.etName.text.toString().trim()
             val email = binding.etEmail.text.toString().trim()
@@ -37,10 +41,21 @@ class RegisterFragment : Fragment() {
             } else if (password != confirmPassword) {
                 Toast.makeText(requireContext(), "הסיסמאות לא תואמות", Toast.LENGTH_SHORT).show()
             } else {
-                // ניווט למסך הבית לאחר רישום מוצלח (כרגע ללא אימות אמיתי)
-                findNavController().navigate(R.id.action_registerFragment_to_homeFragment)
+                registerUser(email, password)
             }
         }
+    }
+
+    private fun registerUser(email: String, password: String) {
+        auth.createUserWithEmailAndPassword(email, password)
+            .addOnCompleteListener(requireActivity()) { task ->
+                if (task.isSuccessful) {
+                    Toast.makeText(requireContext(), "נרשמת בהצלחה!", Toast.LENGTH_SHORT).show()
+                    findNavController().navigate(R.id.action_registerFragment_to_homeFragment)
+                } else {
+                    Toast.makeText(requireContext(), "שגיאה: ${task.exception?.message}", Toast.LENGTH_LONG).show()
+                }
+            }
     }
 
     override fun onDestroyView() {
