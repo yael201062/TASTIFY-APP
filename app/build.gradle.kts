@@ -47,6 +47,8 @@ android {
 }
 
 dependencies {
+    implementation(libs.places)
+    implementation(libs.mediation.test.suite)
     val roomversion = "2.6.1"
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
