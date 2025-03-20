@@ -10,6 +10,7 @@ data class Review(
     val restaurantId: String = "",
     val rating: Float = 0.0f,
     val comment: String = "",
+    val imagePath: String? = null,
     val timestamp: Long = System.currentTimeMillis()
 )
 
