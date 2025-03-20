@@ -1,65 +1,66 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.profile.ProfileFragment">
+    android:padding="16dp"
+    android:gravity="center_horizontal">
 
-    <!-- תמונת פרופיל -->
     <ImageView
         android:id="@+id/ivProfileImage"
         android:layout_width="120dp"
         android:layout_height="120dp"
+        android:scaleType="centerCrop"
         android:src="@drawable/ic_launcher_foreground"
-        android:layout_marginTop="32dp"
-        android:contentDescription="@string/app_name"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"/>
 
-    <!-- שדה שם משתמש -->
-    <EditText
-        android:id="@+id/etProfileName"
-        android:layout_width="0dp"
+    <TextView
+        android:id="@+id/tvUserName"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:hint="Full Name"
-        android:inputType="textPersonName"
-        android:textColorHint="@android:color/darker_gray"
-        android:padding="12dp"
-        android:background="@android:drawable/editbox_background"
+        android:text="Username"
+        android:textSize="20sp"
+        android:textStyle="bold"
         app:layout_constraintTop_toBottomOf="@id/ivProfileImage"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="16dp" />
+        android:layout_marginTop="12dp"/>
 
-    <!-- שדה אימייל -->
-    <EditText
-        android:id="@+id/etProfileEmail"
-        android:layout_width="0dp"
+    <TextView
+        android:id="@+id/tvEmail"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:hint="Email"
-        android:inputType="textEmailAddress"
-        android:textColorHint="@android:color/darker_gray"
-        android:padding="12dp"
-        android:background="@android:drawable/editbox_background"
-        app:layout_constraintTop_toBottomOf="@id/etProfileName"
+        android:text="Email"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        app:layout_constraintTop_toBottomOf="@id/tvUserName"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="16dp" />
+        android:layout_marginTop="12dp"/>
 
-    <!-- כפתור עדכון פרופיל -->
+    <TextView
+        android:id="@+id/tvFullName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="us"
+        android:textSize="18sp"
+        app:layout_constraintTop_toBottomOf="@id/tvUserName"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="8dp"/>
+
     <Button
-        android:id="@+id/btnUpdateProfile"
-        android:layout_width="0dp"
+        android:id="@+id/btnEditProfile"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Update Profile"
+        android:text="Edit Profile"
         android:textColor="@android:color/white"
-        android:backgroundTint="@android:color/black"
-        app:layout_constraintTop_toBottomOf="@id/etProfileEmail"
+        android:backgroundTint="@color/colorPrimary"
+        app:layout_constraintTop_toBottomOf="@id/tvFullName"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="32dp"
-        android:paddingStart="16dp"
-        android:paddingEnd="16dp"/>
+        android:layout_marginTop="24dp"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

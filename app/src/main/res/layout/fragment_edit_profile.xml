@@ -1,7 +1,9 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     android:padding="16dp"
     android:gravity="center_horizontal">
 
@@ -9,63 +11,37 @@
         android:id="@+id/ivProfileImage"
         android:layout_width="120dp"
         android:layout_height="120dp"
-        android:layout_gravity="center"
         android:scaleType="centerCrop"
-        android:src="@drawable/ic_launcher_foreground"/>
+        android:src="@drawable/default_profile"
+        android:layout_gravity="center"/>
 
     <Button
         android:id="@+id/btnSelectImage"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Select a picture"
-        android:layout_gravity="center"
-        android:layout_marginTop="8dp"/>
-
-    <EditText
-        android:id="@+id/etFirstName"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="First Name"
-        android:layout_marginTop="16dp"
-        android:padding="10dp"
-        android:background="@drawable/edit_text_background"/>
-
-    <EditText
-        android:id="@+id/etLastName"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Last Name"
-        android:layout_marginTop="16dp"
-        android:padding="10dp"
-        android:background="@drawable/edit_text_background"/>
+        android:text="בחר תמונה"
+        android:layout_marginTop="16dp"/>
 
     <EditText
         android:id="@+id/etUserName"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Username"
-        android:layout_marginTop="16dp"
-        android:padding="10dp"
-        android:background="@drawable/edit_text_background"/>
+        android:hint="שם"
+        android:layout_marginTop="16dp"/>
 
-    <!-- שדה אימייל (חדש) -->
     <EditText
         android:id="@+id/etUserEmail"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Email"
-        android:inputType="textEmailAddress"
-        android:layout_marginTop="16dp"
-        android:padding="10dp"
-        android:background="@drawable/edit_text_background"/>
+        android:hint="אימייל"
+        android:layout_marginTop="16dp"/>
 
     <Button
         android:id="@+id/btnSave"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Save"
-        android:textColor="@android:color/white"
-        android:backgroundTint="@color/colorPrimary"
-        android:layout_marginTop="24dp"/>
+        android:text="שמור"
+        android:layout_marginTop="24dp"
+        android:layout_gravity="center"/>
 
 </LinearLayout>

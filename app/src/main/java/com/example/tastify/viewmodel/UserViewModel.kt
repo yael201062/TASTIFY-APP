@@ -4,6 +4,7 @@ import androidx.lifecycle.*
 import com.example.tastify.data.model.User
 import com.example.tastify.data.dao.repository.UserRepository
 import kotlinx.coroutines.launch
+import com.google.firebase.auth.FirebaseAuth
 
 class UserViewModel(private val repository: UserRepository) : ViewModel() {
 
@@ -12,9 +13,26 @@ class UserViewModel(private val repository: UserRepository) : ViewModel() {
 
     fun loadUser(userId: String) {
         repository.getUserById(userId).observeForever { user ->
-            _currentUser.postValue(user)
+            if (user == null) {
+                val firebaseUser = FirebaseAuth.getInstance().currentUser
+                if (firebaseUser != null) {
+                    val newUser = User(
+                        id = firebaseUser.uid,
+                        name = firebaseUser.displayName ?: "משתמש חדש",
+                        email = firebaseUser.email ?: "",
+                        profileImageUrl = firebaseUser.photoUrl?.toString() ?: ""
+                    )
+                    viewModelScope.launch {
+                        repository.insertUser(newUser)
+                        _currentUser.postValue(newUser) // שמירה וטעינה מיידית
+                    }
+                }
+            } else {
+                _currentUser.postValue(user)
+            }
         }
     }
+
 
     fun updateUser(user: User) {
         viewModelScope.launch {

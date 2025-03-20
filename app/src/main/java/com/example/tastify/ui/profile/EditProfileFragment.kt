@@ -9,21 +9,39 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
+import com.example.tastify.R
+import com.example.tastify.data.dao.repository.UserRepository
+import com.example.tastify.data.database.AppDatabase
 import com.example.tastify.data.model.User
 import com.example.tastify.databinding.FragmentEditProfileBinding
 import com.example.tastify.viewmodel.UserViewModel
-import kotlinx.coroutines.launch
+import com.google.firebase.auth.FirebaseAuth
 import com.squareup.picasso.Picasso
+import kotlinx.coroutines.launch
 
 class EditProfileFragment : Fragment() {
 
     private var _binding: FragmentEditProfileBinding? = null
     private val binding get() = _binding!!
-    private val userViewModel: UserViewModel by viewModels()
+
+    // ViewModel + Repository
+    private lateinit var userViewModel: UserViewModel
     private var selectedImageUri: Uri? = null
-    private var currentUser: User? = null  // שמירת המשתמש הנוכחי
+    private var currentUser: User? = null
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        // אתחול ה-ViewModel עם UserRepository
+        val userDao = AppDatabase.getDatabase(requireContext()).userDao()
+        val userRepository = UserRepository(userDao)
+
+        userViewModel = ViewModelProvider(this, UserViewModel.Factory(userRepository))
+            .get(UserViewModel::class.java)
+    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentEditProfileBinding.inflate(inflater, container, false)
@@ -33,16 +51,25 @@ class EditProfileFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // טעינת פרטי המשתמש הנוכחי מה-ViewModel (Room)
-        userViewModel.currentUser.observe(viewLifecycleOwner) { user ->
-            user?.let {
-                currentUser = it
-                binding.etUserName.setText(it.name)
-                binding.etUserEmail.setText(it.email)  // הוספת שדה email לעריכה
-                if (!it.profileImageUrl.isNullOrEmpty()) {
-                    Picasso.get().load(it.profileImageUrl).into(binding.ivProfileImage)
+        val firebaseUser = FirebaseAuth.getInstance().currentUser
+        if (firebaseUser != null) {
+            val userId = firebaseUser.uid  // 🔹 קבלת ה-UID של המשתמש המחובר
+            userViewModel.loadUser(userId) // טוען את הנתונים של המשתמש מהמסד
+
+            userViewModel.currentUser.observe(viewLifecycleOwner) { user ->
+                user?.let {
+                    currentUser = it
+                    binding.etUserName.setText(it.name ?: "")
+                    binding.etUserEmail.setText(it.email ?: "")
+                    if (!it.profileImageUrl.isNullOrEmpty()) {
+                        Picasso.get().load(it.profileImageUrl).into(binding.ivProfileImage)
+                    } else {
+                        binding.ivProfileImage.setImageResource(R.drawable.default_profile)
+                    }
                 }
             }
+        } else {
+            Toast.makeText(requireContext(), "שגיאה: אין משתמש מחובר", Toast.LENGTH_SHORT).show()
         }
 
         binding.btnSelectImage.setOnClickListener {
@@ -57,18 +84,13 @@ class EditProfileFragment : Fragment() {
     private fun saveUserData() {
         val name = binding.etUserName.text.toString().trim()
         val email = binding.etUserEmail.text.toString().trim()
-        val userId = currentUser?.id ?: return  // מקבל את ה-ID של המשתמש הנוכחי
+        val userId = currentUser?.id ?: return
 
-        if (name.isBlank()) {
-            Toast.makeText(requireContext(), "נא להזין שם", Toast.LENGTH_SHORT).show()
-            return
-        }
-        if (email.isBlank()) {
-            Toast.makeText(requireContext(), "נא להזין אימייל", Toast.LENGTH_SHORT).show()
+        if (name.isBlank() || email.isBlank()) {
+            Toast.makeText(requireContext(), "נא למלא את כל השדות", Toast.LENGTH_SHORT).show()
             return
         }
 
-        // אם המשתמש בחר תמונה חדשה, נשתמש בה, אחרת נשמור את התמונה הקודמת
         val profileImageUrl = selectedImageUri?.toString() ?: currentUser?.profileImageUrl ?: ""
 
         val updatedUser = User(id = userId, name = name, email = email, profileImageUrl = profileImageUrl)
@@ -76,7 +98,7 @@ class EditProfileFragment : Fragment() {
         lifecycleScope.launch {
             userViewModel.updateUser(updatedUser)
             Toast.makeText(requireContext(), "הפרופיל עודכן בהצלחה", Toast.LENGTH_SHORT).show()
-            requireActivity().onBackPressedDispatcher.onBackPressed()
+            findNavController().popBackStack() // חזרה לעמוד הפרופיל
         }
     }
 
