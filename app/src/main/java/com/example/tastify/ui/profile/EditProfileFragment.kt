@@ -14,9 +14,8 @@ import androidx.lifecycle.lifecycleScope
 import com.example.tastify.data.model.User
 import com.example.tastify.databinding.FragmentEditProfileBinding
 import com.example.tastify.viewmodel.UserViewModel
-import com.google.firebase.auth.FirebaseAuth
-import com.squareup.picasso.Picasso
 import kotlinx.coroutines.launch
+import com.squareup.picasso.Picasso
 
 class EditProfileFragment : Fragment() {
 
@@ -24,6 +23,7 @@ class EditProfileFragment : Fragment() {
     private val binding get() = _binding!!
     private val userViewModel: UserViewModel by viewModels()
     private var selectedImageUri: Uri? = null
+    private var currentUser: User? = null  // שמירת המשתמש הנוכחי
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentEditProfileBinding.inflate(inflater, container, false)
@@ -33,10 +33,15 @@ class EditProfileFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // טעינת פרטי המשתמש הנוכחי מה-ViewModel (Room)
         userViewModel.currentUser.observe(viewLifecycleOwner) { user ->
-            binding.etUserName.setText(user?.name)
-            if (!user?.profileImageUrl.isNullOrEmpty()) {
-                Picasso.get().load(user?.profileImageUrl).into(binding.ivProfileImage)
+            user?.let {
+                currentUser = it
+                binding.etUserName.setText(it.name)
+                binding.etUserEmail.setText(it.email)  // הוספת שדה email לעריכה
+                if (!it.profileImageUrl.isNullOrEmpty()) {
+                    Picasso.get().load(it.profileImageUrl).into(binding.ivProfileImage)
+                }
             }
         }
 
@@ -45,26 +50,33 @@ class EditProfileFragment : Fragment() {
         }
 
         binding.btnSave.setOnClickListener {
-            val name = binding.etUserName.text.toString().trim()
-            val userId = FirebaseAuth.getInstance().currentUser?.uid
+            saveUserData()
+        }
+    }
 
-            if (userId == null) {
-                Toast.makeText(requireContext(), "שגיאה בזיהוי המשתמש", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
+    private fun saveUserData() {
+        val name = binding.etUserName.text.toString().trim()
+        val email = binding.etUserEmail.text.toString().trim()
+        val userId = currentUser?.id ?: return  // מקבל את ה-ID של המשתמש הנוכחי
 
-            if (name.isBlank()) {
-                Toast.makeText(requireContext(), "נא להזין שם", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
+        if (name.isBlank()) {
+            Toast.makeText(requireContext(), "נא להזין שם", Toast.LENGTH_SHORT).show()
+            return
+        }
+        if (email.isBlank()) {
+            Toast.makeText(requireContext(), "נא להזין אימייל", Toast.LENGTH_SHORT).show()
+            return
+        }
 
-            val user = User(id = userId, name = name, profileImageUrl = selectedImageUri?.toString() ?: "")
+        // אם המשתמש בחר תמונה חדשה, נשתמש בה, אחרת נשמור את התמונה הקודמת
+        val profileImageUrl = selectedImageUri?.toString() ?: currentUser?.profileImageUrl ?: ""
 
-            lifecycleScope.launch {
-                userViewModel.updateUser(user)
-                Toast.makeText(requireContext(), "הפרופיל עודכן בהצלחה", Toast.LENGTH_SHORT).show()
-                requireActivity().onBackPressedDispatcher.onBackPressed()
-            }
+        val updatedUser = User(id = userId, name = name, email = email, profileImageUrl = profileImageUrl)
+
+        lifecycleScope.launch {
+            userViewModel.updateUser(updatedUser)
+            Toast.makeText(requireContext(), "הפרופיל עודכן בהצלחה", Toast.LENGTH_SHORT).show()
+            requireActivity().onBackPressedDispatcher.onBackPressed()
         }
     }
 

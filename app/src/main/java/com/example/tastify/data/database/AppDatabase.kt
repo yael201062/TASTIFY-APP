@@ -8,24 +8,47 @@ import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.example.tastify.data.dao.RestaurantDao
 import com.example.tastify.data.dao.ReviewDao
+import com.example.tastify.data.dao.UserDao
 import com.example.tastify.data.model.Restaurant
 import com.example.tastify.data.model.Review
+import com.example.tastify.data.model.User
 
-@Database(entities = [Review::class, Restaurant::class], version = 2, exportSchema = false)
+@Database(entities = [Review::class, Restaurant::class, User::class], version = 3, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {
 
     abstract fun reviewDao(): ReviewDao
     abstract fun restaurantDao(): RestaurantDao
+    abstract fun userDao(): UserDao
 
     companion object {
         @Volatile
         private var INSTANCE: AppDatabase? = null
 
-        // Migration from version 1 to 2 (Add new column to Review table)
-        private val MIGRATION_1_2 = object : Migration(1, 2) {
+        private val MIGRATION_2_3 = object : Migration(2, 3) {
             override fun migrate(database: SupportSQLiteDatabase) {
-                // Example: Adding a new column "imagePath" to the reviews table
-                database.execSQL("ALTER TABLE reviews ADD COLUMN imagePath TEXT DEFAULT NULL")
+                // יצירת טבלה `users` מחדש עם הגדרות נכונות
+                database.execSQL(
+                    "CREATE TABLE IF NOT EXISTS users_new (" +
+                            "id TEXT PRIMARY KEY NOT NULL, " +
+                            "name TEXT DEFAULT NULL, " +
+                            "email TEXT NOT NULL, " +
+                            "profileImageUrl TEXT DEFAULT NULL)"
+                )
+
+                // בדיקה אם הטבלה הישנה קיימת לפני ביצוע העתקת הנתונים
+                try {
+                    database.execSQL(
+                        "INSERT INTO users_new (id, name, email, profileImageUrl) " +
+                                "SELECT id, name, email, profileImageUrl FROM users"
+                    )
+                    database.execSQL("DROP TABLE users")
+                } catch (e: Exception) {
+                    // אם הטבלה `users` לא הייתה קיימת, לא נבצע העתקה
+                    e.printStackTrace()
+                }
+
+                // שינוי שם הטבלה החדשה ל-`users`
+                database.execSQL("ALTER TABLE users_new RENAME TO users")
             }
         }
 
@@ -36,12 +59,8 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "app_database"
                 )
-                    // Option 1: Keep existing data (use migrations)
-                   // .addMigrations(MIGRATION_1_2)
-
-                    // Option 2: Reset DB when schema changes (if data loss is acceptable)
-                     .fallbackToDestructiveMigration()
-
+                    .addMigrations(MIGRATION_2_3) // שימוש במיגרציה כדי לשמור נתונים
+                    .fallbackToDestructiveMigration() // אופציה למחיקת מסד הנתונים במקרה של כשל
                     .build()
                 INSTANCE = instance
                 instance

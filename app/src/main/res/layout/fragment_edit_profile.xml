@@ -48,6 +48,17 @@
         android:padding="10dp"
         android:background="@drawable/edit_text_background"/>
 
+    <!-- שדה אימייל (חדש) -->
+    <EditText
+        android:id="@+id/etUserEmail"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Email"
+        android:inputType="textEmailAddress"
+        android:layout_marginTop="16dp"
+        android:padding="10dp"
+        android:background="@drawable/edit_text_background"/>
+
     <Button
         android:id="@+id/btnSave"
         android:layout_width="match_parent"

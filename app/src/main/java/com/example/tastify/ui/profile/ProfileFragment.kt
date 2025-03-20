@@ -29,16 +29,18 @@ class ProfileFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        val userId = "1" // יש להחליף ב-ID הנכון של המשתמש המחובר
+        userViewModel.loadUser(userId)
+
         userViewModel.currentUser.observe(viewLifecycleOwner) { user ->
             user?.let {
-                binding.tvUserName.text = it.name ?: "Unknown User"
+                binding.tvUserName.text = it.name
+                binding.tvUserEmail.text = it.email
+
                 if (!it.profileImageUrl.isNullOrEmpty()) {
-                    Picasso.get()
-                        .load(it.profileImageUrl)
-                        .error(android.R.drawable.sym_def_app_icon)
-                        .into(binding.ivProfileImage)
+                    Picasso.get().load(it.profileImageUrl).error(R.drawable.default_profile).into(binding.ivProfileImage)
                 } else {
-                    binding.ivProfileImage.setImageResource(android.R.drawable.sym_def_app_icon)
+                    binding.ivProfileImage.setImageResource(R.drawable.default_profile)
                 }
             }
         }
@@ -46,14 +48,5 @@ class ProfileFragment : Fragment() {
         binding.btnEditProfile.setOnClickListener {
             findNavController().navigate(R.id.action_profileFragment_to_editProfileFragment)
         }
-
-        binding.btnMyPosts.setOnClickListener {
-            findNavController().navigate(R.id.action_profileFragment_to_myPostsFragment)
-        }
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
     }
 }

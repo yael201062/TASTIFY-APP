@@ -1,27 +1,18 @@
 package com.example.tastify.data.dao
 
+import androidx.lifecycle.LiveData
+import androidx.room.*
+
 import com.example.tastify.data.model.User
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.ktx.toObject
-import kotlinx.coroutines.tasks.await
 
-class UserDao {
-    private val auth = FirebaseAuth.getInstance()
-    private val firestore = FirebaseFirestore.getInstance()
+@Dao
+interface UserDao {
+    @Query("SELECT * FROM users WHERE id = :userId LIMIT 1")
+    fun getUser(userId: String): LiveData<User?>
 
-    suspend fun getUser(): User? {
-        val userId = auth.currentUser?.uid ?: return null
-        return try {
-            val document = firestore.collection("users").document(userId).get().await()
-            document.toObject<User>()
-        } catch (e: Exception) {
-            null
-        }
-    }
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertUser(user: User)
 
-    suspend fun updateUser(user: User) {
-        val userId = auth.currentUser?.uid ?: return
-        firestore.collection("users").document(userId).set(user).await()
-    }
+    @Update
+    suspend fun updateUser(user: User)
 }
