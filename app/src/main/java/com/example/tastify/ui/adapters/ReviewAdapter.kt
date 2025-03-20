@@ -4,6 +4,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.RatingBar
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.tastify.R
@@ -14,6 +15,9 @@ class ReviewsAdapter(private var reviews: MutableList<Review>) :
     RecyclerView.Adapter<ReviewsAdapter.ReviewViewHolder>() {
 
     class ReviewViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        val txtUserName: TextView = view.findViewById(R.id.tvPostUserName)
+        val txtRestaurantName: TextView = view.findViewById(R.id.tvRestaurantName)
+        val ratingBar: RatingBar = view.findViewById(R.id.ratingBar)
         val txtComment: TextView = view.findViewById(R.id.tvPostContent)
         val imgReview: ImageView = view.findViewById(R.id.ivPostImage)
     }
@@ -26,9 +30,18 @@ class ReviewsAdapter(private var reviews: MutableList<Review>) :
 
     override fun onBindViewHolder(holder: ReviewViewHolder, position: Int) {
         val review = reviews[position]
+
+        holder.txtUserName.text = review.userId
+        holder.txtRestaurantName.text = review.restaurantId
+        holder.ratingBar.rating = review.rating
         holder.txtComment.text = review.comment
-        review.imagePath?.let {
-            Picasso.get().load(it).into(holder.imgReview)
+
+        // בדיקה אם יש תמונה להצגה
+        if (!review.imagePath.isNullOrEmpty()) {
+            holder.imgReview.visibility = View.VISIBLE
+            Picasso.get().load(review.imagePath).into(holder.imgReview)
+        } else {
+            holder.imgReview.visibility = View.GONE
         }
     }
 
