@@ -1,76 +1,75 @@
 package com.example.tastify.ui.restaurant
 
 import android.os.Bundle
-import android.util.Log
+import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.tastify.R
-import com.example.tastify.data.api.OpenTableApiClient
-import com.example.tastify.data.api.OpenTableRestaurant
+import com.example.tastify.data.api.PexelsApiClient
+import com.example.tastify.data.api.PexelsResponse
 import com.example.tastify.databinding.ActivityRestaurantDetailsBinding
 import com.squareup.picasso.Picasso
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import com.squareup.picasso.Callback as PicassoCallback // ✅ תיקון הייבוא של Picasso
 
 class RestaurantDetailsActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityRestaurantDetailsBinding
+    private val pexelsApiKey = "gFSlPVkAj4QaAGCeNH3jvmcMeikyuaubFHMKRfGrdh8xQQqfKAnkM8ni" // ✅ API Key שלך
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityRestaurantDetailsBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        val restaurantId = intent.getStringExtra("restaurantId")
+        val restaurantName = intent.getStringExtra("restaurantName") ?: "Restaurant"
+        val cuisine = intent.getStringExtra("cuisine") ?: "Food"
 
-        Log.d("RestaurantDetailsActivity", "Received restaurantId: $restaurantId")
+        binding.textViewRestaurantName.text = restaurantName
+        binding.textViewCuisine.text = "Cuisine: $cuisine"
 
-        if (!restaurantId.isNullOrEmpty()) {
-            fetchRestaurantDetails(restaurantId)
-        } else {
-            Toast.makeText(this, "Restaurant ID not found", Toast.LENGTH_SHORT).show()
-            finish()
-        }
+        fetchRestaurantImage(restaurantName, cuisine)
     }
 
-    private fun fetchRestaurantDetails(restaurantId: String) {
-        OpenTableApiClient.apiService.getRestaurantDetails(restaurantId)
-            .enqueue(object : Callback<OpenTableRestaurant> {
-                override fun onResponse(
-                    call: Call<OpenTableRestaurant>,
-                    response: Response<OpenTableRestaurant>
-                ) {
-                    Log.d("RestaurantDetailsActivity", "API Response Code: ${response.code()}")
+    private fun fetchRestaurantImage(restaurantName: String, cuisine: String) {
+        val query = "$restaurantName $cuisine"
 
-                    if (response.isSuccessful && response.body() != null) {
-                        Log.d("RestaurantDetailsActivity", "API Response: ${response.body()}")
-                        displayRestaurantDetails(response.body()!!)
+        binding.progressBarImageLoading.visibility = View.VISIBLE // ✅ הצגת progress bar
+
+        PexelsApiClient.apiService.searchRestaurantImages(pexelsApiKey, query)
+            .enqueue(object : Callback<PexelsResponse> {
+                override fun onResponse(call: Call<PexelsResponse>, response: Response<PexelsResponse>) {
+                    binding.progressBarImageLoading.visibility = View.GONE // ✅ הסתרת progress bar
+
+                    if (response.isSuccessful && response.body()?.photos?.isNotEmpty() == true) {
+                        val imageUrl = response.body()!!.photos[0].src.original
+                        loadImage(imageUrl)
                     } else {
-                        val errorMessage = response.errorBody()?.string()
-                        Log.e("RestaurantDetailsActivity", "Failed to load data. Error: $errorMessage")
-                        Toast.makeText(this@RestaurantDetailsActivity, "Failed to load data", Toast.LENGTH_SHORT).show()
-                        finish()
+                        binding.imageViewRestaurant.setImageResource(R.drawable.ic_launcher_foreground) // ✅ תמונת ברירת מחדל
                     }
                 }
 
-                override fun onFailure(call: Call<OpenTableRestaurant>, t: Throwable) {
-                    Log.e("RestaurantDetailsActivity", "API Request Failed: ${t.message}")
-                    Toast.makeText(this@RestaurantDetailsActivity, "Error: ${t.message}", Toast.LENGTH_SHORT).show()
+                override fun onFailure(call: Call<PexelsResponse>, t: Throwable) {
+                    binding.progressBarImageLoading.visibility = View.GONE // ✅ הסתרת progress bar במקרה של כישלון
+                    Toast.makeText(this@RestaurantDetailsActivity, "Failed to load image", Toast.LENGTH_SHORT).show()
+                    binding.imageViewRestaurant.setImageResource(R.drawable.ic_launcher_foreground) // ✅ תמונת ברירת מחדל במקרה של שגיאה
                 }
             })
     }
 
-    private fun displayRestaurantDetails(restaurant: OpenTableRestaurant) {
-        binding.textViewRestaurantName.text = restaurant.name
-        binding.textViewRestaurantAddress.text = "${restaurant.address}, ${restaurant.city}, ${restaurant.country}"
-        binding.textViewRating.text = "Price Level: ${restaurant.price}"
-        binding.textViewCuisine.text = "Cuisine: ${restaurant.area}"
+    private fun loadImage(imageUrl: String) {
+        Picasso.get().load(imageUrl)
+            .into(binding.imageViewRestaurant, object : PicassoCallback { // ✅ שימוש נכון ב-Picasso Callback
+                override fun onSuccess() {
+                    binding.progressBarImageLoading.visibility = View.GONE // ✅ הסתרת progress bar אחרי טעינה מוצלחת
+                }
 
-        if (!restaurant.image_url.isNullOrEmpty()) {
-            Picasso.get().load(restaurant.image_url).into(binding.imageViewRestaurant)
-        } else {
-            binding.imageViewRestaurant.setImageResource(R.drawable.ic_launcher_foreground)
-        }
+                override fun onError(e: Exception?) {
+                    binding.progressBarImageLoading.visibility = View.GONE // ✅ הסתרת progress bar במקרה של כישלון
+                    binding.imageViewRestaurant.setImageResource(R.drawable.ic_launcher_foreground) // ✅ תמונת ברירת מחדל במקרה של שגיאה
+                }
+            })
     }
 }

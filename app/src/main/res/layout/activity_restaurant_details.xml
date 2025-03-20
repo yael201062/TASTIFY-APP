@@ -9,40 +9,58 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
+        <!-- תמונת המסעדה -->
         <ImageView
             android:id="@+id/imageViewRestaurant"
             android:layout_width="match_parent"
             android:layout_height="200dp"
             android:scaleType="centerCrop"
-            android:layout_marginBottom="16dp"/>
+            android:layout_marginBottom="16dp"
+            android:src="@drawable/ic_launcher_background"/>
 
+        <!-- ProgressBar לטעינת תמונה -->
+        <ProgressBar
+            android:id="@+id/progressBarImageLoading"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:visibility="gone"/>
+
+        <!-- שם המסעדה -->
         <TextView
             android:id="@+id/textViewRestaurantName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="22sp"
             android:textStyle="bold"
-            android:layout_marginBottom="8dp" />
+            android:layout_marginBottom="8dp"
+            android:text="Restaurant Name"/>
 
+        <!-- כתובת המסעדה -->
         <TextView
             android:id="@+id/textViewRestaurantAddress"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="16sp"
-            android:layout_marginBottom="8dp" />
+            android:layout_marginBottom="8dp"
+            android:text="Address: Not Available"/>
 
+        <!-- דירוג המסעדה -->
         <TextView
             android:id="@+id/textViewRating"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="16sp"
-            android:layout_marginBottom="8dp" />
+            android:layout_marginBottom="8dp"
+            android:text="Rating: N/A"/>
 
+        <!-- סוג המטבח -->
         <TextView
             android:id="@+id/textViewCuisine"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="16sp"
-            android:layout_marginBottom="8dp" />
+            android:layout_marginBottom="8dp"
+            android:text="Cuisine: N/A"/>
     </LinearLayout>
 </ScrollView>

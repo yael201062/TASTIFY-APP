@@ -3,12 +3,14 @@ package com.example.tastify.data.api
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
-object OpenTableApiClient {
-    val apiService: OpenTableApiService by lazy {
+object PexelsApiClient {
+    private const val BASE_URL = "https://api.pexels.com/v1/"
+
+    val apiService: PexelsApiService by lazy {
         Retrofit.Builder()
-            .baseUrl("https://opentable.herokuapp.com/api/")
+            .baseUrl(BASE_URL)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
-            .create(OpenTableApiService::class.java)
+            .create(PexelsApiService::class.java)
     }
 }
