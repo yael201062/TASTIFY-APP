@@ -18,6 +18,7 @@
             android:enabled="false"
             android:exported="false"
             tools:node="remove"/>
+
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -28,6 +29,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- הוספת מסך פרטי מסעדה -->
+        <activity
+            android:name=".ui.restaurant.RestaurantDetailsActivity"
+            android:exported="true"
+            android:theme="@style/Theme.MaterialComponents.Light.NoActionBar" />
 
     </application>
 </manifest>

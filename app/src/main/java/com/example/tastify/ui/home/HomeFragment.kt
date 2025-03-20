@@ -35,10 +35,10 @@ class HomeFragment : Fragment() {
 
         binding.recyclerReviews.layoutManager = LinearLayoutManager(requireContext())
 
-        adapter = ReviewsAdapter(mutableListOf()) // אתחל עם רשימה ריקה
+        adapter = ReviewsAdapter(requireContext(), mutableListOf()) // להעביר את ה-Context
         binding.recyclerReviews.adapter = adapter
 
-        // מאזין לשינויים בביקורות ומעדכן את ה-Adapter
+        // מאזין לכל הביקורות ומעדכן את ה-Adapter
         lifecycleScope.launch {
             reviewViewModel.reviews.collect { reviewsList ->
                 adapter.updateData(reviewsList)

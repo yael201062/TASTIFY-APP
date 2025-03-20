@@ -1,5 +1,7 @@
 package com.example.tastify.ui.adapters
 
+import android.content.Context
+import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -9,10 +11,13 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.tastify.R
 import com.example.tastify.data.model.Review
+import com.example.tastify.ui.restaurant.RestaurantDetailsActivity
 import com.squareup.picasso.Picasso
 
-class ReviewsAdapter(private var reviews: MutableList<Review>) :
-    RecyclerView.Adapter<ReviewsAdapter.ReviewViewHolder>() {
+class ReviewsAdapter(
+    private val context: Context,
+    private var reviews: MutableList<Review>
+) : RecyclerView.Adapter<ReviewsAdapter.ReviewViewHolder>() {
 
     class ReviewViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val txtUserName: TextView = view.findViewById(R.id.tvPostUserName)
@@ -36,12 +41,20 @@ class ReviewsAdapter(private var reviews: MutableList<Review>) :
         holder.ratingBar.rating = review.rating
         holder.txtComment.text = review.comment
 
-        // בדיקה אם יש תמונה להצגה
+        // הצגת תמונה אם קיימת
         if (!review.imagePath.isNullOrEmpty()) {
             holder.imgReview.visibility = View.VISIBLE
             Picasso.get().load(review.imagePath).into(holder.imgReview)
         } else {
             holder.imgReview.visibility = View.GONE
+        }
+
+        // הוספת לחיצה על הפריט
+        holder.itemView.setOnClickListener {
+            val intent = Intent(context, RestaurantDetailsActivity::class.java).apply {
+                putExtra("restaurantId", review.restaurantId) // שליחת ID של המסעדה
+            }
+            context.startActivity(intent)
         }
     }
 
