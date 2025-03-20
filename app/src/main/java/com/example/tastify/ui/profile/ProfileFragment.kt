@@ -31,11 +31,14 @@ class ProfileFragment : Fragment() {
 
         userViewModel.currentUser.observe(viewLifecycleOwner) { user ->
             user?.let {
-                binding.tvUserName.text = it.name
+                binding.tvUserName.text = it.name ?: "Unknown User"
                 if (!it.profileImageUrl.isNullOrEmpty()) {
-                    Picasso.get().load(it.profileImageUrl).into(binding.ivProfileImage)
+                    Picasso.get()
+                        .load(it.profileImageUrl)
+                        .error(android.R.drawable.sym_def_app_icon)
+                        .into(binding.ivProfileImage)
                 } else {
-                    binding.ivProfileImage.setImageResource(R.drawable.plus_icon_background)
+                    binding.ivProfileImage.setImageResource(android.R.drawable.sym_def_app_icon)
                 }
             }
         }

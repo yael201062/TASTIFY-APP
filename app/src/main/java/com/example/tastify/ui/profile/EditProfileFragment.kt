@@ -11,8 +11,10 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import com.example.tastify.data.model.User
 import com.example.tastify.databinding.FragmentEditProfileBinding
 import com.example.tastify.viewmodel.UserViewModel
+import com.google.firebase.auth.FirebaseAuth
 import com.squareup.picasso.Picasso
 import kotlinx.coroutines.launch
 
@@ -43,15 +45,25 @@ class EditProfileFragment : Fragment() {
         }
 
         binding.btnSave.setOnClickListener {
-            val name = binding.etUserName.text.toString()
+            val name = binding.etUserName.text.toString().trim()
+            val userId = FirebaseAuth.getInstance().currentUser?.uid
+
+            if (userId == null) {
+                Toast.makeText(requireContext(), "שגיאה בזיהוי המשתמש", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
             if (name.isBlank()) {
                 Toast.makeText(requireContext(), "נא להזין שם", Toast.LENGTH_SHORT).show()
-            } else {
-                lifecycleScope.launch {
-                    userViewModel.updateProfile(name, selectedImageUri)
-                    Toast.makeText(requireContext(), "הפרופיל עודכן בהצלחה", Toast.LENGTH_SHORT).show()
-                    requireActivity().onBackPressedDispatcher.onBackPressed()
-                }
+                return@setOnClickListener
+            }
+
+            val user = User(id = userId, name = name, profileImageUrl = selectedImageUri?.toString() ?: "")
+
+            lifecycleScope.launch {
+                userViewModel.updateUser(user)
+                Toast.makeText(requireContext(), "הפרופיל עודכן בהצלחה", Toast.LENGTH_SHORT).show()
+                requireActivity().onBackPressedDispatcher.onBackPressed()
             }
         }
     }
