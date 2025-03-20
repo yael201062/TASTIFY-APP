@@ -13,10 +13,10 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.tastify.R
 import com.example.tastify.data.database.AppDatabase
 import com.example.tastify.data.model.Post
-import com.example.tastify.data.repository.ReviewRepository
+import com.example.tastify.data.dao.repository.ReviewRepository
 import com.example.tastify.databinding.FragmentMyPostsBinding
 import com.example.tastify.ui.adapters.ReviewsAdapter
-import com.example.tastify.ui.home.PostAdapter
+import com.example.tastify.ui.adapters.PostAdapter
 import com.example.tastify.viewmodel.ReviewViewModel
 import com.example.tastify.viewmodel.ReviewViewModelFactory
 import com.google.firebase.auth.FirebaseAuth

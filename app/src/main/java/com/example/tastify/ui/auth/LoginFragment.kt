@@ -6,10 +6,16 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.example.tastify.R
+import com.example.tastify.data.database.AppDatabase
+import com.example.tastify.data.dao.repository.UserRepository
 import com.example.tastify.databinding.FragmentLoginBinding
+import com.example.tastify.viewmodel.UserViewModel
 import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.launch
 
 class LoginFragment : Fragment() {
 
@@ -17,6 +23,11 @@ class LoginFragment : Fragment() {
     private val binding get() = _binding!!
 
     private lateinit var auth: FirebaseAuth
+
+    private val userViewModel: UserViewModel by viewModels {
+        val userDao = AppDatabase.getDatabase(requireContext()).userDao()
+        UserViewModel.Factory(UserRepository(userDao))
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -29,31 +40,35 @@ class LoginFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // אתחול FirebaseAuth
         auth = FirebaseAuth.getInstance()
 
-        // ניווט למסך ההרשמה בלחיצה על הטקסט "DON’T HAVE AN ACCOUNT? REGISTER"
         binding.tvRegister.setOnClickListener {
             findNavController().navigate(R.id.action_loginFragment_to_registerFragment)
         }
 
-        // בדיקת התחברות
         binding.btnLogin.setOnClickListener {
             val email = binding.etEmail.text.toString()
             val password = binding.etPassword.text.toString()
 
-            // אם יש שדה ריק
             if (email.isEmpty() || password.isEmpty()) {
                 Toast.makeText(requireContext(), "Please fill all fields", Toast.LENGTH_SHORT).show()
             } else {
-                // התחברות עם Firebase Authentication
                 auth.signInWithEmailAndPassword(email, password)
                     .addOnCompleteListener { task ->
                         if (task.isSuccessful) {
-                            // התחברות הצליחה, ניווט למסך הבית
-                            findNavController().navigate(R.id.action_loginFragment_to_homeFragment)
+                            val userId = auth.currentUser?.uid ?: return@addOnCompleteListener
+                            lifecycleScope.launch {
+                                userViewModel.loadUser(userId)
+                            }
+
+                            userViewModel.currentUser.observe(viewLifecycleOwner) { user ->
+                                if (user != null) {
+                                    findNavController().navigate(R.id.action_loginFragment_to_homeFragment)
+                                } else {
+                                    Toast.makeText(requireContext(), "User not found", Toast.LENGTH_SHORT).show()
+                                }
+                            }
                         } else {
-                            // אם ההתחברות נכשלה, הצגת הודעת שגיאה
                             Toast.makeText(requireContext(), "Authentication Failed: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
                         }
                     }
