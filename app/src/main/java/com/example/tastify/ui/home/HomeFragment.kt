@@ -14,7 +14,6 @@ import com.example.tastify.databinding.FragmentHomeBinding
 import com.example.tastify.ui.adapters.ReviewsAdapter
 import com.example.tastify.viewmodel.ReviewViewModel
 import com.example.tastify.viewmodel.ReviewViewModelFactory
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 class HomeFragment : Fragment() {
@@ -55,6 +54,11 @@ class HomeFragment : Fragment() {
         }
 
         return binding.root
+    }
+
+    override fun onResume() {
+        super.onResume()
+        reviewViewModel.loadAllReviews() // טוען מחדש את כל הביקורות בכל פעם שהמסך נפתח
     }
 
     override fun onDestroyView() {

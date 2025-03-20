@@ -9,7 +9,7 @@ interface ReviewDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertReview(review: Review)
 
-    @Query("SELECT * FROM reviews ORDER BY id DESC")
+    @Query("SELECT * FROM reviews ORDER BY timestamp DESC")
     fun getAllReviews(): Flow<List<Review>>
 
     @Query("SELECT * FROM reviews WHERE restaurantId = :restaurantId")

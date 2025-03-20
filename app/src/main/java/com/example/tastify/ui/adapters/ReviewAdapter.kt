@@ -31,8 +31,8 @@ class ReviewsAdapter(private var reviews: MutableList<Review>) :
     override fun onBindViewHolder(holder: ReviewViewHolder, position: Int) {
         val review = reviews[position]
 
-        holder.txtUserName.text = review.userId
-        holder.txtRestaurantName.text = review.restaurantId
+        holder.txtUserName.text = " ${review.userId}"
+        holder.txtRestaurantName.text = "Restaurant Name: ${review.restaurantId}"
         holder.ratingBar.rating = review.rating
         holder.txtComment.text = review.comment
 
