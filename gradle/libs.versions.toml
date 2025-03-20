@@ -17,6 +17,7 @@ filamentAndroid = "1.17.1"
 firebaseFirestoreKtx = "25.1.2"
 places = "4.1.0"
 mediationTestSuite = "3.0.0"
+firebaseStorageKtx = "21.0.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -42,6 +43,7 @@ filament-android = { group = "com.google.ar.sceneform", name = "filament-android
 firebase-firestore-ktx = { group = "com.google.firebase", name = "firebase-firestore-ktx", version.ref = "firebaseFirestoreKtx" }
 places = { group = "com.google.android.libraries.places", name = "places", version.ref = "places" }
 mediation-test-suite = { group = "com.google.android.ads", name = "mediation-test-suite", version.ref = "mediationTestSuite" }
+firebase-storage-ktx = { group = "com.google.firebase", name = "firebase-storage-ktx", version.ref = "firebaseStorageKtx" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
