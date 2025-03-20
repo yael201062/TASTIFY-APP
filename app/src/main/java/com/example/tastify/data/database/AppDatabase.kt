@@ -26,25 +26,30 @@ abstract class AppDatabase : RoomDatabase() {
 
         private val MIGRATION_2_3 = object : Migration(2, 3) {
             override fun migrate(database: SupportSQLiteDatabase) {
-                // יצירת טבלה `users` מחדש עם הגדרות נכונות
+                // יצירת טבלה חדשה עם מבנה מתוקן
                 database.execSQL(
                     "CREATE TABLE IF NOT EXISTS users_new (" +
                             "id TEXT PRIMARY KEY NOT NULL, " +
-                            "name TEXT DEFAULT NULL, " +
+                            "name TEXT DEFAULT 'Guest', " +  // ✅ ברירת מחדל תקינה
                             "email TEXT NOT NULL, " +
-                            "profileImageUrl TEXT DEFAULT NULL)"
+                            "profileImageUrl TEXT DEFAULT '')"  // ✅ הסרת בעיית NULL
                 )
 
-                // בדיקה אם הטבלה הישנה קיימת לפני ביצוע העתקת הנתונים
-                try {
-                    database.execSQL(
-                        "INSERT INTO users_new (id, name, email, profileImageUrl) " +
-                                "SELECT id, name, email, profileImageUrl FROM users"
-                    )
-                    database.execSQL("DROP TABLE users")
-                } catch (e: Exception) {
-                    // אם הטבלה `users` לא הייתה קיימת, לא נבצע העתקה
-                    e.printStackTrace()
+                // בדיקה אם קיימת טבלת `users` ישנה
+                val cursor = database.query("SELECT name FROM sqlite_master WHERE type='table' AND name='users'")
+                val tableExists = cursor.count > 0
+                cursor.close()
+
+                if (tableExists) {
+                    try {
+                        database.execSQL(
+                            "INSERT INTO users_new (id, name, email, profileImageUrl) " +
+                                    "SELECT id, COALESCE(name, 'Guest'), email, COALESCE(profileImageUrl, '') FROM users"
+                        )
+                        database.execSQL("DROP TABLE users")
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
                 }
 
                 // שינוי שם הטבלה החדשה ל-`users`
@@ -59,8 +64,8 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "app_database"
                 )
-                    .addMigrations(MIGRATION_2_3) // שימוש במיגרציה כדי לשמור נתונים
-                    .fallbackToDestructiveMigration() // אופציה למחיקת מסד הנתונים במקרה של כשל
+                    .addMigrations(MIGRATION_2_3) // ✅ שימוש במיגרציה כדי לשמור נתונים
+                    .fallbackToDestructiveMigration() // ✅ אופציה למחיקה במקרה של בעיה
                     .build()
                 INSTANCE = instance
                 instance
