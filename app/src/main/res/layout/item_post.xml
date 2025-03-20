@@ -14,6 +14,7 @@
         android:padding="16dp"
         android:orientation="vertical">
 
+        <!-- שם המשתמש -->
         <TextView
             android:id="@+id/tvPostUserName"
             android:layout_width="wrap_content"
@@ -22,14 +23,17 @@
             android:textSize="16sp"
             android:textColor="@android:color/black"/>
 
+        <!-- שם המסעדה -->
         <TextView
             android:id="@+id/tvRestaurantName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="14sp"
             android:textStyle="italic"
-            android:textColor="@android:color/darker_gray"/>
+            android:textColor="@android:color/darker_gray"
+            android:layout_marginBottom="4dp"/>
 
+        <!-- דירוג -->
         <RatingBar
             android:id="@+id/ratingBar"
             android:layout_width="wrap_content"
@@ -37,15 +41,19 @@
             android:numStars="5"
             android:stepSize="0.5"
             android:isIndicator="true"
-            style="?android:attr/ratingBarStyleSmall"/>
+            style="?android:attr/ratingBarStyleSmall"
+            android:layout_marginBottom="8dp"/>
 
+        <!-- תמונה אם קיימת -->
         <ImageView
             android:id="@+id/ivPostImage"
             android:layout_width="match_parent"
             android:layout_height="200dp"
             android:scaleType="centerCrop"
-            android:layout_marginTop="8dp"/>
+            android:layout_marginTop="8dp"
+            android:visibility="gone"/>
 
+        <!-- תוכן הביקורת -->
         <TextView
             android:id="@+id/tvPostContent"
             android:layout_width="match_parent"

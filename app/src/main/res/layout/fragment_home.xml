@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     tools:context=".ui.home.HomeFragment">
 
-    <!-- רכיבים קיימים: TextView, Button (Logout), EditText (Search), RecyclerView וכו' -->
+    <!-- טקסט כותרת -->
     <TextView
         android:id="@+id/tvWelcome"
         android:layout_width="wrap_content"
@@ -17,18 +17,20 @@
         android:layout_marginTop="32dp"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/btnLogout" />
+        app:layout_constraintEnd_toStartOf="@id/btnPersonalArea" />
 
+    <!-- כפתור איזור אישי -->
     <Button
-        android:id="@+id/btnLogout"
+        android:id="@+id/btnPersonalArea"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
         android:layout_marginEnd="24dp"
-        android:text="Logout"
+        android:text="אזור אישי"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <!-- תיבת חיפוש -->
     <EditText
         android:id="@+id/etSearch"
         android:layout_width="0dp"
@@ -37,11 +39,12 @@
         android:layout_marginTop="16dp"
         android:padding="12dp"
         android:background="@android:drawable/edit_text"
-        app:layout_constraintTop_toBottomOf="@id/tvWelcome"
+        app:layout_constraintTop_toBottomOf="@id/btnPersonalArea"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toStartOf="@id/btnSearch"
         android:layout_marginEnd="8dp" />
 
+    <!-- כפתור חיפוש -->
     <Button
         android:id="@+id/btnSearch"
         android:layout_width="wrap_content"
@@ -50,30 +53,27 @@
         android:layout_marginEnd="24dp"
         android:text="Search"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tvWelcome" />
+        app:layout_constraintTop_toBottomOf="@id/btnPersonalArea" />
 
+    <!-- רשימת ביקורות -->
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rvPosts"
+        android:id="@+id/recyclerReviews"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginTop="16dp"
-        app:layout_constraintTop_toBottomOf="@id/btnSearch"
+        app:layout_constraintTop_toBottomOf="@id/etSearch"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         tools:listitem="@layout/item_post" />
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
+    <!-- כפתור להוספת ביקורת -->
+    <Button
         android:id="@+id/fabAddReview"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="16dp"
-        android:contentDescription="הוסף ביקורת"
-        android:src="@drawable/baseline_add_24"
-    app:backgroundTint="@color/purple_500"
-    app:layout_constraintBottom_toBottomOf="parent"
-    app:layout_constraintEnd_toEndOf="parent" />
-
-
-
+        android:text="הוספת ביקורת חדשה"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
 </androidx.constraintlayout.widget.ConstraintLayout>
