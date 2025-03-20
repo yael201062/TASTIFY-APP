@@ -3,7 +3,7 @@ package com.example.tastify.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.tastify.data.model.Review
-import com.example.tastify.data.repository.ReviewRepository
+import com.example.tastify.data.dao.repository.ReviewRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch

@@ -1,4 +1,5 @@
-package com.example.tastify.ui.home
+package com.example.tastify.ui.adapters
+
 
 import android.view.LayoutInflater
 import android.view.View

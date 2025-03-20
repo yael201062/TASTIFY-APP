@@ -1,4 +1,4 @@
-package com.example.tastify.data.repository
+package com.example.tastify.data.dao.repository
 
 import com.example.tastify.data.dao.ReviewDao
 import com.example.tastify.data.model.Review

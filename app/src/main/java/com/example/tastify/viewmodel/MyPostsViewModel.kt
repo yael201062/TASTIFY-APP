@@ -1,4 +1,4 @@
-package com.example.tastify.ui.profile
+package com.example.tastify.viewmodel
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData

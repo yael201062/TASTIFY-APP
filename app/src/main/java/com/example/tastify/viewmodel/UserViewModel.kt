@@ -1,25 +1,17 @@
 package com.example.tastify.viewmodel
 
-import android.app.Application
 import androidx.lifecycle.*
-import com.example.tastify.data.database.AppDatabase
 import com.example.tastify.data.model.User
-import com.example.tastify.data.repository.UserRepository
+import com.example.tastify.data.dao.repository.UserRepository
 import kotlinx.coroutines.launch
 
-class UserViewModel(application: Application) : AndroidViewModel(application) {
+class UserViewModel(private val repository: UserRepository) : ViewModel() {
 
-    private val repository: UserRepository
     private val _currentUser = MutableLiveData<User?>()
     val currentUser: LiveData<User?> get() = _currentUser
 
-    init {
-        val userDao = AppDatabase.getDatabase(application).userDao()
-        repository = UserRepository(userDao)
-    }
-
     fun loadUser(userId: String) {
-        repository.getUser(userId).observeForever { user ->
+        repository.getUserById(userId).observeForever { user ->
             _currentUser.value = user
         }
     }
@@ -28,6 +20,22 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             repository.updateUser(user)
             _currentUser.postValue(user)
+        }
+    }
+
+    fun insertUser(user: User) {
+        viewModelScope.launch {
+            repository.insertUser(user)
+        }
+    }
+
+    class Factory(private val repository: UserRepository) : ViewModelProvider.Factory {
+        override fun <T : ViewModel> create(modelClass: Class<T>): T {
+            if (modelClass.isAssignableFrom(UserViewModel::class.java)) {
+                @Suppress("UNCHECKED_CAST")
+                return UserViewModel(repository) as T
+            }
+            throw IllegalArgumentException("Unknown ViewModel class")
         }
     }
 }

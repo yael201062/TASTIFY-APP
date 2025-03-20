@@ -9,7 +9,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.tastify.R
 import com.example.tastify.data.database.AppDatabase
-import com.example.tastify.data.repository.ReviewRepository
+import com.example.tastify.data.dao.repository.ReviewRepository
 import com.example.tastify.databinding.FragmentHomeBinding
 import com.example.tastify.ui.adapters.ReviewsAdapter
 import com.example.tastify.viewmodel.ReviewViewModel

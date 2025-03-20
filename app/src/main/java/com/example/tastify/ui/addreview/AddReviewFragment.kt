@@ -10,7 +10,7 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.example.tastify.data.database.AppDatabase
 import com.example.tastify.data.model.Review
-import com.example.tastify.data.repository.ReviewRepository
+import com.example.tastify.data.dao.repository.ReviewRepository
 import com.example.tastify.databinding.FragmentAddReviewBinding
 import com.example.tastify.viewmodel.ReviewViewModel
 import com.example.tastify.viewmodel.ReviewViewModelFactory

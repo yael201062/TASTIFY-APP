@@ -6,16 +6,29 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.example.tastify.R
+import com.example.tastify.data.database.AppDatabase
+import com.example.tastify.data.model.User
+import com.example.tastify.data.dao.repository.UserRepository
 import com.example.tastify.databinding.FragmentRegisterBinding
+import com.example.tastify.viewmodel.UserViewModel
 import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.launch
 
 class RegisterFragment : Fragment() {
 
     private var _binding: FragmentRegisterBinding? = null
     private val binding get() = _binding!!
-    private lateinit var auth: FirebaseAuth  // FirebaseAuth instance
+
+    private lateinit var auth: FirebaseAuth
+
+    private val userViewModel: UserViewModel by viewModels {
+        val userDao = AppDatabase.getDatabase(requireContext()).userDao()
+        UserViewModel.Factory(UserRepository(userDao))
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -28,7 +41,7 @@ class RegisterFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        auth = FirebaseAuth.getInstance()  // Initialize FirebaseAuth
+        auth = FirebaseAuth.getInstance()
 
         binding.btnRegister.setOnClickListener {
             val name = binding.etName.text.toString().trim()
@@ -41,15 +54,22 @@ class RegisterFragment : Fragment() {
             } else if (password != confirmPassword) {
                 Toast.makeText(requireContext(), "הסיסמאות לא תואמות", Toast.LENGTH_SHORT).show()
             } else {
-                registerUser(email, password)
+                registerUser(name, email, password)
             }
         }
     }
 
-    private fun registerUser(email: String, password: String) {
+    private fun registerUser(name: String, email: String, password: String) {
         auth.createUserWithEmailAndPassword(email, password)
             .addOnCompleteListener(requireActivity()) { task ->
                 if (task.isSuccessful) {
+                    val userId = auth.currentUser?.uid ?: return@addOnCompleteListener
+                    val user = User(id = userId, name = name, email = email, profileImageUrl = "")
+
+                    lifecycleScope.launch {
+                        userViewModel.insertUser(user)
+                    }
+
                     Toast.makeText(requireContext(), "נרשמת בהצלחה!", Toast.LENGTH_SHORT).show()
                     findNavController().navigate(R.id.action_registerFragment_to_homeFragment)
                 } else {
