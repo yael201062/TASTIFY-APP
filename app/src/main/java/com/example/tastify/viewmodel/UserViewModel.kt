@@ -12,7 +12,7 @@ class UserViewModel(private val repository: UserRepository) : ViewModel() {
 
     fun loadUser(userId: String) {
         repository.getUserById(userId).observeForever { user ->
-            _currentUser.value = user
+            _currentUser.postValue(user)
         }
     }
 
