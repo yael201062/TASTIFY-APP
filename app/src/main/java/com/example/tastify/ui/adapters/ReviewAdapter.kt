@@ -10,7 +10,7 @@ import com.example.tastify.R
 import com.example.tastify.data.model.Review
 import com.squareup.picasso.Picasso
 
-class ReviewsAdapter(private val reviews: List<Review>) :
+class ReviewsAdapter(private var reviews: MutableList<Review>) :
     RecyclerView.Adapter<ReviewsAdapter.ReviewViewHolder>() {
 
     class ReviewViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -27,8 +27,16 @@ class ReviewsAdapter(private val reviews: List<Review>) :
     override fun onBindViewHolder(holder: ReviewViewHolder, position: Int) {
         val review = reviews[position]
         holder.txtComment.text = review.comment
-        Picasso.get().load(review.imagePath).into(holder.imgReview)
+        review.imagePath?.let {
+            Picasso.get().load(it).into(holder.imgReview)
+        }
     }
 
     override fun getItemCount() = reviews.size
+
+    fun updateData(newReviews: List<Review>) {
+        reviews.clear()
+        reviews.addAll(newReviews)
+        notifyDataSetChanged()
+    }
 }

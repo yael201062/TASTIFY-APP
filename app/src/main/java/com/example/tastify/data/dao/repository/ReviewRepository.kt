@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.Flow
 
 class ReviewRepository(private val reviewDao: ReviewDao) {
 
-    suspend fun getAllReviews(): Flow<List<Review>> {
+    fun getAllReviews(): Flow<List<Review>> {
         return reviewDao.getAllReviews()
     }
 

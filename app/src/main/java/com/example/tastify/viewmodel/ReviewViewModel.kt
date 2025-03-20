@@ -25,10 +25,10 @@ class ReviewViewModel(private val repository: ReviewRepository) : ViewModel() {
         }
     }
 
-
     fun addReview(review: Review) {
         viewModelScope.launch {
             repository.insertReview(review)
+            loadAllReviews() // טוען מחדש את כל הביקורות כדי לעדכן את הרשימה במסך הבית
         }
     }
 }
