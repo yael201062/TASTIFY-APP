@@ -17,6 +17,8 @@ import com.example.tastify.viewmodel.ReviewViewModel
 import com.example.tastify.viewmodel.ReviewViewModelFactory
 import com.google.firebase.auth.FirebaseAuth
 import com.squareup.picasso.Picasso
+import java.io.File
+import java.io.FileOutputStream
 
 class AddReviewFragment : Fragment() {
 
@@ -61,7 +63,7 @@ class AddReviewFragment : Fragment() {
                 userId = currentUser.uid,
                 comment = comment,
                 rating = rating,
-                imagePath = selectedImageUri?.toString()
+                imagePath = selectedImageUri?.let { copyImageToCache(it) }
             )
 
             reviewViewModel.addReview(review)
@@ -86,8 +88,24 @@ class AddReviewFragment : Fragment() {
         }
     }
 
+    private fun copyImageToCache(uri: Uri): String? {
+        return try {
+            val inputStream = requireContext().contentResolver.openInputStream(uri)
+            val file = File(requireContext().cacheDir, "review_${System.currentTimeMillis()}.jpg")
+            val outputStream = FileOutputStream(file)
+            inputStream?.copyTo(outputStream)
+            inputStream?.close()
+            outputStream.close()
+            file.absolutePath // ✅ return the saved image path
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
+        }
+    }
+
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
     }
+
 }

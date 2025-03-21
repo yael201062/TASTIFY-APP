@@ -23,6 +23,7 @@ import okhttp3.Call
 import okhttp3.Callback
 import okhttp3.Response
 import org.json.JSONObject
+import java.io.File
 import java.io.IOException
 
 class ReviewsAdapter(private var reviews: MutableList<Review>,  private val isEditable: Boolean = false) :
@@ -76,36 +77,41 @@ class ReviewsAdapter(private var reviews: MutableList<Review>,  private val isEd
         holder.txtComment.text = review.comment
 
         if (!review.imagePath.isNullOrEmpty()) {
-            holder.imgReview.visibility = View.VISIBLE
-            Picasso.get().load(review.imagePath).into(holder.imgReview)
-        } else {
-            // טען תמונה רנדומלית של אוכל מ-Unsplash אם אין imagePath
-            val client = OkHttpClient()
-            val request = Request.Builder()
-                .url("https://api.unsplash.com/photos/random?query=food&client_id=0c3PEFtuji3Yu2TyMg9M4XKB-dh1KWKFrK2ldqy--mk")
-                .build()
-
-            client.newCall(request).enqueue(object : Callback {
-                override fun onFailure(call: Call, e: IOException) {
-                    e.printStackTrace()
-                }
-
-                override fun onResponse(call: Call, response: Response) {
-                    response.use {
-                        val json = it.body?.string() ?: return
-                        val imageUrl = JSONObject(json)
-                            .getJSONObject("urls")
-                            .getString("regular")
-
-                        holder.imgReview.post {
-                            Picasso.get().load(imageUrl).into(holder.imgReview)
-                            holder.imgReview.visibility = View.VISIBLE
-                        }
-                    }
-                }
-            })
+            val file = File(review.imagePath)
+            if (file.exists()) {
+                holder.imgReview.visibility = View.VISIBLE
+                Picasso.get().load(file).into(holder.imgReview)
+            }
         }
-    }
+
+
+//        } else {
+//            // טען תמונה רנדומלית של אוכל מ-Unsplash אם אין imagePath
+//            val client = OkHttpClient()
+//            val request = Request.Builder()
+//                .url("https://api.unsplash.com/photos/random?query=food&client_id=0c3PEFtuji3Yu2TyMg9M4XKB-dh1KWKFrK2ldqy--mk")
+//                .build()
+//
+//            client.newCall(request).enqueue(object : Callback {
+//                override fun onFailure(call: Call, e: IOException) {
+//                    e.printStackTrace()
+//                }
+//
+//                override fun onResponse(call: Call, response: Response) {
+//                    response.use {
+//                        val json = it.body?.string() ?: return
+//                        val imageUrl = JSONObject(json)
+//                            .getJSONObject("urls")
+//                            .getString("regular")
+//
+//                        holder.imgReview.post {
+//                            Picasso.get().load(imageUrl).into(holder.imgReview)
+//                            holder.imgReview.visibility = View.VISIBLE
+//                        }
+//                    }
+//                }
+//            })
+        }
 
     override fun getItemCount() = reviews.size
 
