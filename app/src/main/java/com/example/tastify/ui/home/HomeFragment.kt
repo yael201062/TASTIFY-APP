@@ -16,6 +16,8 @@ import com.example.tastify.viewmodel.ReviewViewModel
 import com.example.tastify.viewmodel.ReviewViewModelFactory
 import kotlinx.coroutines.launch
 
+
+
 class HomeFragment : Fragment() {
 
     private var _binding: FragmentHomeBinding? = null
@@ -82,8 +84,11 @@ class HomeFragment : Fragment() {
         reviewViewModel.loadAllReviews()
     }
 
+
+
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
     }
 }
+
