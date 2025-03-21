@@ -8,7 +8,9 @@ import android.widget.RatingBar
 import android.widget.TextView
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.findNavController
 import androidx.recyclerview.widget.RecyclerView
+import com.example.tastify.ui.profile.MyPostsFragmentDirections
 import com.example.tastify.R
 import com.example.tastify.data.database.AppDatabase
 import com.example.tastify.data.dao.repository.UserRepository
@@ -16,7 +18,7 @@ import com.example.tastify.data.model.Review
 import com.example.tastify.viewmodel.UserViewModel
 import com.squareup.picasso.Picasso
 
-class ReviewsAdapter(private var reviews: MutableList<Review>) :
+class ReviewsAdapter(private var reviews: MutableList<Review>,  private val isEditable: Boolean = false) :
     RecyclerView.Adapter<ReviewsAdapter.ReviewViewHolder>() {
 
     class ReviewViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -53,6 +55,14 @@ class ReviewsAdapter(private var reviews: MutableList<Review>) :
             .observe(context as LifecycleOwner) { name ->
                 holder.txtUserName.text = name ?: "משתמש לא ידוע"
             }
+
+
+        if (isEditable) {
+            holder.itemView.setOnClickListener {
+                val action = MyPostsFragmentDirections.actionMyPostsFragmentToEditReviewFragment(review.id.toString())
+                it.findNavController().navigate(action)
+            }
+        }
 
         holder.txtRestaurantName.text = "מסעדה: ${review.restaurantId}"
         holder.ratingBar.rating = review.rating

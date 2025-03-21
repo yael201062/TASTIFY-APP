@@ -38,7 +38,24 @@ class ReviewViewModel(private val repository: ReviewRepository) : ViewModel() {
         return repository.getReviewsByUser(userId)
     }
 
+    fun getReviewById(reviewId: String): LiveData<Review?> {
+        return repository.getReviewById(reviewId)
+    }
+
     fun getReviewsByRestaurant(restaurantId: String): Flow<List<Review>> {
         return repository.getReviewsByRestaurant(restaurantId)
     }
+
+    fun updateReview(review: Review) {
+        viewModelScope.launch {
+            repository.updateReview(review)
+        }
+    }
+
+    fun deleteReview(review: Review) {
+        viewModelScope.launch {
+            repository.deleteReview(review)
+        }
+    }
+
 }

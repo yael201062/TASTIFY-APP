@@ -40,16 +40,14 @@ class MyPostsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        adapter = ReviewsAdapter(mutableListOf())
+        adapter = ReviewsAdapter(mutableListOf(), isEditable = true)
         binding.recyclerReviews.layoutManager = LinearLayoutManager(requireContext())
         binding.recyclerReviews.adapter = adapter
 
-        // ✅ משתמש מחובר דרך Firebase
         val currentUser = FirebaseAuth.getInstance().currentUser
         if (currentUser != null) {
             val userId = currentUser.uid
 
-            // ✅ טען ביקורות מה-ROOM לפי userId
             reviewViewModel.getReviewsByUser(userId).observe(viewLifecycleOwner, Observer { reviews ->
                 adapter.updateData(reviews.toMutableList())
             })

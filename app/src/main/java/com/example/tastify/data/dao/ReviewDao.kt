@@ -19,6 +19,11 @@ interface ReviewDao {
     @Query("SELECT * FROM reviews WHERE userId = :userId")
     fun getReviewsByUserId(userId: String): LiveData<List<Review>>
 
+    @Query("SELECT * FROM reviews WHERE id = :reviewId")
+    fun getReviewById(reviewId: String): LiveData<Review?>
+
+    @Update
+    suspend fun updateReview(review: Review)
 
     @Delete
     suspend fun deleteReview(review: Review)
