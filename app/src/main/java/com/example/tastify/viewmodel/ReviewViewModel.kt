@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.tastify.data.model.Review
 import com.example.tastify.data.dao.repository.ReviewRepository
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -39,6 +40,10 @@ class ReviewViewModel(private val repository: ReviewRepository) : ViewModel() {
 
     fun getReviewById(reviewId: String): LiveData<Review?> {
         return repository.getReviewById(reviewId)
+    }
+
+    fun getReviewsByRestaurant(restaurantId: String): Flow<List<Review>> {
+        return repository.getReviewsByRestaurant(restaurantId)
     }
 
     fun updateReview(review: Review) {
