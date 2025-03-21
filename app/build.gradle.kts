@@ -7,6 +7,7 @@ plugins {
     //id("com.android.application")
     id("com.google.gms.google-services")
     id("com.google.devtools.ksp")
+    id("androidx.navigation.safeargs.kotlin")
 }
 
 android {
