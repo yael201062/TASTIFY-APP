@@ -34,17 +34,22 @@ class HomeFragment : Fragment() {
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
 
         binding.recyclerReviews.layoutManager = LinearLayoutManager(requireContext())
-
-        adapter = ReviewsAdapter(mutableListOf()) // אתחל עם רשימה ריקה
+        adapter = ReviewsAdapter(mutableListOf())
         binding.recyclerReviews.adapter = adapter
 
-        // מאזין לשינויים בביקורות ומעדכן את ה-Adapter
-        lifecycleScope.launch {
-            reviewViewModel.reviews.collect { reviewsList ->
-                adapter.updateData(reviewsList)
+        observeAllReviews()
+
+        // כפתור חיפוש לפי restaurantId
+        binding.btnSearch.setOnClickListener {
+            val searchQuery = binding.etSearch.text.toString().trim()
+            if (searchQuery.isNotEmpty()) {
+                observeReviewsByRestaurantId(searchQuery)
+            } else {
+                observeAllReviews()
             }
         }
 
+        // ניווטים
         binding.fabAddReview.setOnClickListener {
             findNavController().navigate(R.id.addReviewFragment)
         }
@@ -56,9 +61,25 @@ class HomeFragment : Fragment() {
         return binding.root
     }
 
+    private fun observeAllReviews() {
+        lifecycleScope.launch {
+            reviewViewModel.reviews.collect { reviewsList ->
+                adapter.updateData(reviewsList)
+            }
+        }
+    }
+
+    private fun observeReviewsByRestaurantId(restaurantId: String) {
+        lifecycleScope.launch {
+            reviewViewModel.getReviewsByRestaurant(restaurantId).collect { filtered ->
+                adapter.updateData(filtered)
+            }
+        }
+    }
+
     override fun onResume() {
         super.onResume()
-        reviewViewModel.loadAllReviews() // טוען מחדש את כל הביקורות בכל פעם שהמסך נפתח
+        reviewViewModel.loadAllReviews()
     }
 
     override fun onDestroyView() {
