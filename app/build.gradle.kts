@@ -7,6 +7,7 @@ plugins {
     //id("com.android.application")
     id("com.google.gms.google-services")
     id("com.google.devtools.ksp")
+    id("androidx.navigation.safeargs.kotlin")
 }
 
 android {
@@ -42,13 +43,15 @@ android {
     buildFeatures {
         compose = true
         viewBinding = true
-
+        dataBinding = true
     }
 }
 
 dependencies {
     implementation(libs.places)
     implementation(libs.mediation.test.suite)
+    implementation(libs.firebase.storage.ktx)
+    implementation(libs.firebase.storage.ktx)
     val roomversion = "2.6.1"
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -81,7 +84,8 @@ dependencies {
     implementation ("com.google.android.material:material:1.11.0")
     implementation("androidx.fragment:fragment-ktx:1.6.2")
     implementation("androidx.room:room-runtime:$roomversion")
-        // If this project uses any Kotlin source, use Kotlin Symbol Processing (KSP)
+    implementation("com.squareup.okhttp3:okhttp:4.10.0")
+    // If this project uses any Kotlin source, use Kotlin Symbol Processing (KSP)
         // See Add the KSP plugin to your project
     ksp("androidx.room:room-compiler:$roomversion")
         // If this project only uses Java source, use the Java annotationProcessor

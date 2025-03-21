@@ -5,76 +5,93 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16dp"
+    android:padding="24dp"
     tools:context=".ui.addreview.AddReviewFragment">
+
+    <TextView
+        android:id="@+id/tvTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:text="הוספת ביקורת"
+        android:textColor="@color/colorPrimary"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.497"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <EditText
         android:id="@+id/etRestaurantName"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:background="@android:drawable/edit_text"
         android:hint="שם המסעדה"
         android:padding="12dp"
-        android:background="@android:drawable/edit_text"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
-
-    <EditText
-        android:id="@+id/etLocation"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:hint="מיקום"
-        android:padding="12dp"
-        android:background="@android:drawable/edit_text"
-        app:layout_constraintTop_toBottomOf="@id/etRestaurantName"
-        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintVertical_bias="0"/>
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tvTitle" />
 
     <EditText
         android:id="@+id/etReviewContent"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:background="@android:drawable/edit_text"
         android:hint="תוכן הביקורת"
         android:padding="12dp"
-        android:background="@android:drawable/edit_text"
-        app:layout_constraintTop_toBottomOf="@id/etLocation"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        app:layout_constraintTop_toBottomOf="@id/etRestaurantName" />
 
     <RatingBar
         android:id="@+id/ratingBar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="40dp"
         android:numStars="5"
         android:stepSize="0.5"
-        app:layout_constraintTop_toBottomOf="@id/etReviewContent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.495"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        app:layout_constraintTop_toBottomOf="@id/etReviewContent" />
 
     <Button
         android:id="@+id/btnSelectImage"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginStart="128dp"
+        android:layout_marginTop="32dp"
+        android:backgroundTint="@color/colorPrimary"
         android:text="בחר תמונה"
-        app:layout_constraintTop_toBottomOf="@id/ratingBar"
-        app:layout_constraintStart_toStartOf="parent"/>
+        android:textColor="@android:color/white"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/ratingBar" />
 
     <ImageView
         android:id="@+id/ivSelectedImage"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
+        android:layout_width="93dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="12dp"
         android:scaleType="centerCrop"
-        android:contentDescription="תמונה שנבחרה"
-        app:layout_constraintTop_toBottomOf="@id/btnSelectImage"
-        app:layout_constraintStart_toStartOf="parent"/>
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/btnSelectImage" />
 
     <Button
         android:id="@+id/btnSubmitReview"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:backgroundTint="@color/colorPrimary"
         android:text="שלח ביקורת"
-        app:layout_constraintTop_toBottomOf="@id/ivSelectedImage"
-        app:layout_constraintStart_toStartOf="parent"/>
+        android:textColor="@android:color/white"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/ivSelectedImage" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,8 +1,13 @@
 package com.example.tastify.data.model
 
+import androidx.room.ColumnInfo
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+
+@Entity(tableName = "users")
 data class User(
-    val id: String = "",
-    val name: String = "",
-    val email: String = "",
-    val profileImageUrl: String = ""
+    @PrimaryKey val id: String,
+    @ColumnInfo(name = "name") val name: String?,
+    @ColumnInfo(name = "email") val email: String,
+    @ColumnInfo(name = "profileImageUrl", defaultValue = "") val profileImageUrl: String?
 )

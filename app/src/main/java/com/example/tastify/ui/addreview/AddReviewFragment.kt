@@ -4,119 +4,30 @@ import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.util.Log
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
 import com.example.tastify.data.database.AppDatabase
 import com.example.tastify.data.model.Review
-import com.example.tastify.data.repository.ReviewRepository
-import androidx.navigation.fragment.findNavController
+import com.example.tastify.data.dao.repository.ReviewRepository
 import com.example.tastify.databinding.FragmentAddReviewBinding
-import com.example.tastify.databinding.FragmentHomeBinding
 import com.example.tastify.viewmodel.ReviewViewModel
-
-//class AddReviewFragment : Fragment() {
-//
-//    private var _binding: FragmentAddReviewBinding? = null
-//    private val binding get() = _binding!!
-//    private lateinit var reviewViewModel: ReviewViewModel
-//    private lateinit var database: AppDatabase
-//    private var selectedImageUri: Uri? = null
-//
-//    override fun onCreateView(
-//        inflater: LayoutInflater, container: ViewGroup?,
-//        savedInstanceState: Bundle?
-//    ) {
-//        _binding = FragmentAddReviewBinding.inflate(inflater, container, false)
-//        database = AppDatabase.getDatabase(requireContext())
-//        val repository = ReviewRepository(database.reviewDao())
-//        reviewViewModel = ReviewViewModel(repository)
-//
-//        // כפתור להוספת ביקורת חדשה
-//        binding.btnSubmitReview.setOnClickListener {
-//            val review = Review(
-//                restaurantId = binding.etRestaurantId.text.toString(),
-//                userId = "user@example.com",  // יש לשלוף אימייל אמיתי מהמשתמש המחובר
-//                comment = binding.etReview.text.toString(),
-//                rating = binding.ratingBar.rating
-//            )
-//
-//            reviewViewModel.insertReview(review)
-//            Toast.makeText(requireContext(), "הביקורת נוספה", Toast.LENGTH_SHORT).show()
-////        }
-//        return binding.root
-//    }
-//
-////    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-////        super.onViewCreated(view, savedInstanceState)
-////
-////        binding.btnSelectImage.setOnClickListener {
-////            openGallery()
-////        }
-////    }
-////
-////    private fun openGallery() {
-////        val intent = Intent(Intent.ACTION_PICK)
-////        intent.type = "image/*"
-////        startActivityForResult(intent, REQUEST_IMAGE_PICK)
-////    }
-//
-////    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-////        super.onActivityResult(requestCode, resultCode, data)
-////        if (requestCode == REQUEST_IMAGE_PICK && resultCode == Activity.RESULT_OK) {
-////            selectedImageUri = data?.data
-////            binding.ivSelectedImage.setImageURI(selectedImageUri)
-////        }
-////    }
-//
-////    private fun submitReview() {
-////        val restaurantName = binding.etRestaurantName.text.toString()
-////        val location = binding.etLocation.text.toString()
-////        val reviewContent = binding.etReviewContent.text.toString()
-////        val rating = binding.ratingBar.rating
-////
-////        if (restaurantName.isEmpty() || location.isEmpty() || reviewContent.isEmpty()) {
-////            Toast.makeText(requireContext(), "נא למלא את כל השדות", Toast.LENGTH_SHORT).show()
-////            return
-////        }
-////
-////        // שליחת הנתונים (כאן תוכל לשמור אותם ב-ViewModel או ב-Database)
-////        Toast.makeText(requireContext(), "הביקורת נוספה בהצלחה!", Toast.LENGTH_SHORT).show()
-////        findNavController().navigateUp()
-////    }
-//
-//    override fun onDestroyView() {
-//        super.onDestroyView()
-//        _binding = null
-//    }
-//
-////    companion object {
-////        private const val REQUEST_IMAGE_PICK = 1001
-////    }
-//}
-
-
-//import android.os.Bundle
-//import android.view.LayoutInflater
-//import android.view.View
-//import android.view.ViewGroup
-//import android.widget.Toast
-//import androidx.fragment.app.Fragment
-//import com.example.tastify.data.database.AppDatabase
-//import com.example.tastify.data.model.Review
-//import com.example.tastify.data.repository.ReviewRepository
-//import com.example.tastify.databinding.FragmentHomeBinding
+import com.example.tastify.viewmodel.ReviewViewModelFactory
+import com.google.firebase.auth.FirebaseAuth
+import com.squareup.picasso.Picasso
 
 class AddReviewFragment : Fragment() {
 
     private var _binding: FragmentAddReviewBinding? = null
     private val binding get() = _binding!!
 
-    private lateinit var reviewViewModel: ReviewViewModel
-    private lateinit var database: AppDatabase
+    private val reviewViewModel: ReviewViewModel by viewModels {
+        ReviewViewModelFactory(ReviewRepository(AppDatabase.getDatabase(requireContext()).reviewDao()))
+    }
+
+    private var selectedImageUri: Uri? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -124,26 +35,55 @@ class AddReviewFragment : Fragment() {
     ): View {
         _binding = FragmentAddReviewBinding.inflate(inflater, container, false)
 
-        // אתחול ה-Database וה-ViewModel
-        database = AppDatabase.getDatabase(requireContext())
-        val repository = ReviewRepository(database.reviewDao())
-        reviewViewModel = ReviewViewModel(repository)
+        binding.btnSelectImage.setOnClickListener {
+            selectImageFromGallery()
+        }
 
-        // כפתור להוספת ביקורת חדשה
         binding.btnSubmitReview.setOnClickListener {
+            val currentUser = FirebaseAuth.getInstance().currentUser
+
+            if (currentUser == null) {
+                Toast.makeText(requireContext(), "לא ניתן להוסיף ביקורת - אין משתמש מחובר", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            val restaurantName = binding.etRestaurantName.text.toString().trim()
+            val comment = binding.etReviewContent.text.toString().trim()
+            val rating = binding.ratingBar.rating
+
+            if (restaurantName.isEmpty() || comment.isEmpty()) {
+                Toast.makeText(requireContext(), "נא למלא את כל השדות", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
             val review = Review(
-                restaurantId = binding.etRestaurantName.text.toString(),
-                userId = "user@example.com",  // יש לשלוף אימייל אמיתי מהמשתמש המחובר
-                comment = binding.etReviewContent.text.toString(),
-                rating = binding.ratingBar.rating
+                restaurantId = restaurantName,
+                userId = currentUser.uid,
+                comment = comment,
+                rating = rating,
+                imagePath = selectedImageUri?.toString()
             )
 
             reviewViewModel.addReview(review)
-            Log.d("Review", "Inserted review: ${review.comment} with rating: ${review.rating}")
-            Toast.makeText(requireContext(), "הביקורת נוספה", Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), "הביקורת נוספה בהצלחה", Toast.LENGTH_SHORT).show()
+            findNavController().navigateUp()
         }
 
         return binding.root
+    }
+
+    private fun selectImageFromGallery() {
+        val intent = Intent(Intent.ACTION_PICK)
+        intent.type = "image/*"
+        startActivityForResult(intent, 2001)
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == 2001 && resultCode == Activity.RESULT_OK) {
+            selectedImageUri = data?.data
+            binding.ivSelectedImage.setImageURI(selectedImageUri)
+        }
     }
 
     override fun onDestroyView() {

@@ -1,9 +1,11 @@
 package com.example.tastify.viewmodel
 
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.tastify.data.model.Review
-import com.example.tastify.data.repository.ReviewRepository
+import com.example.tastify.data.dao.repository.ReviewRepository
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -25,10 +27,35 @@ class ReviewViewModel(private val repository: ReviewRepository) : ViewModel() {
         }
     }
 
-
     fun addReview(review: Review) {
         viewModelScope.launch {
             repository.insertReview(review)
+            loadAllReviews() // טוען מחדש את כל הביקורות כדי לעדכן את הרשימה במסך הבית
         }
     }
+
+    fun getReviewsByUser(userId: String): LiveData<List<Review>> {
+        return repository.getReviewsByUser(userId)
+    }
+
+    fun getReviewById(reviewId: String): LiveData<Review?> {
+        return repository.getReviewById(reviewId)
+    }
+
+    fun getReviewsByRestaurant(restaurantId: String): Flow<List<Review>> {
+        return repository.getReviewsByRestaurant(restaurantId)
+    }
+
+    fun updateReview(review: Review) {
+        viewModelScope.launch {
+            repository.updateReview(review)
+        }
+    }
+
+    fun deleteReview(review: Review) {
+        viewModelScope.launch {
+            repository.deleteReview(review)
+        }
+    }
+
 }

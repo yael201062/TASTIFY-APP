@@ -11,12 +11,10 @@
         android:label="Login"
         tools:layout="@layout/fragment_login">
 
-        <!-- ניווט מהתחברות למסך הבית -->
         <action
             android:id="@+id/action_loginFragment_to_homeFragment"
             app:destination="@id/homeFragment" />
 
-        <!-- ניווט מהתחברות למסך הרשמה -->
         <action
             android:id="@+id/action_loginFragment_to_registerFragment"
             app:destination="@id/registerFragment" />
@@ -29,12 +27,10 @@
         android:label="Register"
         tools:layout="@layout/fragment_register">
 
-        <!-- ניווט מהרשמה למסך הבית -->
         <action
             android:id="@+id/action_registerFragment_to_homeFragment"
             app:destination="@id/homeFragment" />
 
-        <!-- ניווט חזרה מההרשמה להתחברות -->
         <action
             android:id="@+id/action_registerFragment_to_loginFragment"
             app:destination="@id/loginFragment" />
@@ -47,11 +43,59 @@
         android:label="Home"
         tools:layout="@layout/fragment_home" />
 
+    <!-- מסך הוספת ביקורת -->
     <fragment
         android:id="@+id/addReviewFragment"
         android:name="com.example.tastify.ui.addreview.AddReviewFragment"
-    android:label="Add Review"
-    tools:layout="@layout/fragment_add_review" />
+        android:label="Add Review"
+        tools:layout="@layout/fragment_add_review" />
 
+    <!-- מסך פרופיל -->
+    <fragment
+        android:id="@+id/profileFragment"
+        android:name="com.example.tastify.ui.profile.ProfileFragment"
+        android:label="Profile"
+        tools:layout="@layout/fragment_profile">
+
+        <action
+            android:id="@+id/action_profileFragment_to_editProfileFragment"
+            app:destination="@id/editProfileFragment" />
+
+        <action
+            android:id="@+id/action_profileFragment_to_myPostsFragment"
+            app:destination="@id/myPostsFragment" />
+    </fragment>
+
+    <!-- מסך עריכת פרופיל -->
+    <fragment
+        android:id="@+id/editProfileFragment"
+        android:name="com.example.tastify.ui.profile.EditProfileFragment"
+        android:label="Edit Profile"
+        tools:layout="@layout/fragment_edit_profile" />
+
+    <!-- מסך פוסטים של המשתמש -->
+    <fragment
+        android:id="@+id/myPostsFragment"
+        android:name="com.example.tastify.ui.profile.MyPostsFragment"
+        android:label="My Posts"
+        tools:layout="@layout/fragment_my_posts">
+
+        <action
+            android:id="@+id/action_myPostsFragment_to_editReviewFragment"
+            app:destination="@id/editReviewFragment" />
+    </fragment>
+
+    <!-- מסך עריכת ביקורת -->
+    <fragment
+        android:id="@+id/editReviewFragment"
+        android:name="com.example.tastify.ui.addreview.EditReviewFragment"
+        android:label="Edit Review"
+        tools:layout="@layout/fragment_edit_review">
+
+        <argument
+            android:name="reviewId"
+            app:argType="string"
+            android:defaultValue="" />
+    </fragment>
 
 </navigation>
