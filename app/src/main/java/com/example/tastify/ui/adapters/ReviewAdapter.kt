@@ -47,6 +47,7 @@ class ReviewsAdapter(private var reviews: MutableList<Review>) :
 
     override fun getItemCount() = reviews.size
 
+    // ✅ עכשיו ניתן להשתמש ב-clear() וב-addAll()
     fun updateData(newReviews: List<Review>) {
         reviews.clear()
         reviews.addAll(newReviews)

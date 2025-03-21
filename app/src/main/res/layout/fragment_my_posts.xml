@@ -25,7 +25,7 @@
         android:id="@+id/btnUpdateProfile"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Update Profile"
+        android:text="Profile"
         android:textColor="@android:color/white"
         android:backgroundTint="@color/design_default_color_primary"
         android:layout_marginStart="8dp"
@@ -33,7 +33,6 @@
         app:layout_constraintEnd_toEndOf="parent" />
 
     <!-- רשימת הפוסטים האישיים -->
-    <!-- רשימת ביקורות -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerReviews"
         android:layout_width="0dp"
@@ -44,6 +43,5 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         tools:listitem="@layout/item_post" />
-
 
 </androidx.constraintlayout.widget.ConstraintLayout>
