@@ -1,7 +1,6 @@
 package com.example.tastify.ui.profile
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,16 +10,22 @@ import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.tastify.R
+import com.example.tastify.data.database.AppDatabase
+import com.example.tastify.data.dao.repository.ReviewRepository
 import com.example.tastify.databinding.FragmentMyPostsBinding
 import com.example.tastify.ui.adapters.ReviewsAdapter
-import com.example.tastify.viewmodel.MyPostsViewModel
+import com.example.tastify.viewmodel.ReviewViewModel
+import com.example.tastify.viewmodel.ReviewViewModelFactory
 import com.google.firebase.auth.FirebaseAuth
 
 class MyPostsFragment : Fragment() {
 
     private var _binding: FragmentMyPostsBinding? = null
     private val binding get() = _binding!!
-    private val myPostsViewModel: MyPostsViewModel by viewModels()
+
+    private val reviewViewModel: ReviewViewModel by viewModels {
+        ReviewViewModelFactory(ReviewRepository(AppDatabase.getDatabase(requireContext()).reviewDao()))
+    }
 
     private lateinit var adapter: ReviewsAdapter
 
@@ -35,28 +40,23 @@ class MyPostsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // הגדרת RecyclerView
+        adapter = ReviewsAdapter(mutableListOf())
         binding.recyclerReviews.layoutManager = LinearLayoutManager(requireContext())
-        adapter = ReviewsAdapter(mutableListOf()) // ✅ יצירת אדפטר עם רשימה ריקה שניתנת לשינוי
         binding.recyclerReviews.adapter = adapter
 
-        // טעינת ביקורות של המשתמש המחובר
-        val firebaseUser = FirebaseAuth.getInstance().currentUser
-        if (firebaseUser != null) {
-            val userId = firebaseUser.uid
-            Log.d("MyPostsFragment", "🔹 User ID: $userId") // ✅ בדיקת ה-UID
+        // ✅ משתמש מחובר דרך Firebase
+        val currentUser = FirebaseAuth.getInstance().currentUser
+        if (currentUser != null) {
+            val userId = currentUser.uid
 
-            myPostsViewModel.getMyReviews(userId) // 🔹 טעינת הביקורות של המשתמש
-
-            myPostsViewModel.myReviews.observe(viewLifecycleOwner, Observer { reviews ->
-                Log.d("MyPostsFragment", "✅ Loaded ${reviews.size} reviews") // ✅ בדיקה אם הנתונים מגיעים
-                adapter.updateData(reviews.toMutableList()) // ✅ עדכון הנתונים ברשימה
+            // ✅ טען ביקורות מה-ROOM לפי userId
+            reviewViewModel.getReviewsByUser(userId).observe(viewLifecycleOwner, Observer { reviews ->
+                adapter.updateData(reviews.toMutableList())
             })
         } else {
             binding.tvMyPostsTitle.text = "אין משתמש מחובר"
         }
 
-        // כפתור חזרה לעמוד הפרופיל
         binding.btnUpdateProfile.setOnClickListener {
             findNavController().navigate(R.id.profileFragment)
         }

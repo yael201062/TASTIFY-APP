@@ -14,6 +14,7 @@ import com.example.tastify.data.dao.repository.ReviewRepository
 import com.example.tastify.databinding.FragmentAddReviewBinding
 import com.example.tastify.viewmodel.ReviewViewModel
 import com.example.tastify.viewmodel.ReviewViewModelFactory
+import com.google.firebase.auth.FirebaseAuth
 
 class AddReviewFragment : Fragment() {
 
@@ -31,9 +32,18 @@ class AddReviewFragment : Fragment() {
         _binding = FragmentAddReviewBinding.inflate(inflater, container, false)
 
         binding.btnSubmitReview.setOnClickListener {
+            val currentUser = FirebaseAuth.getInstance().currentUser
+
+            if (currentUser == null) {
+                Toast.makeText(requireContext(), "לא ניתן להוסיף ביקורת - אין משתמש מחובר", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            val userId = currentUser.uid // ✅ ה-UID של המשתמש המחובר
+
             val review = Review(
                 restaurantId = binding.etRestaurantName.text.toString(),
-                userId = "user@example.com",  // יש לשלוף אימייל אמיתי מהמשתמש המחובר
+                userId = userId,
                 comment = binding.etReviewContent.text.toString(),
                 rating = binding.ratingBar.rating
             )
@@ -41,7 +51,7 @@ class AddReviewFragment : Fragment() {
             reviewViewModel.addReview(review)
             Toast.makeText(requireContext(), "הביקורת נוספה", Toast.LENGTH_SHORT).show()
 
-            // חזרה למסך הבית לאחר הוספה
+            // חזרה למסך הקודם
             findNavController().navigateUp()
         }
 

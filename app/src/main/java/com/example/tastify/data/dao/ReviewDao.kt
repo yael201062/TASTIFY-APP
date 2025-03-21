@@ -1,5 +1,6 @@
 package com.example.tastify.data.dao
 
+import androidx.lifecycle.LiveData
 import androidx.room.*
 import com.example.tastify.data.model.Review
 import kotlinx.coroutines.flow.Flow
@@ -14,6 +15,10 @@ interface ReviewDao {
 
     @Query("SELECT * FROM reviews WHERE restaurantId = :restaurantId")
     fun getReviewsByRestaurant(restaurantId: String): Flow<List<Review>>
+
+    @Query("SELECT * FROM reviews WHERE userId = :userId")
+    fun getReviewsByUserId(userId: String): LiveData<List<Review>>
+
 
     @Delete
     suspend fun deleteReview(review: Review)

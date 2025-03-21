@@ -1,5 +1,6 @@
 package com.example.tastify.viewmodel
 
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.tastify.data.model.Review
@@ -31,4 +32,9 @@ class ReviewViewModel(private val repository: ReviewRepository) : ViewModel() {
             loadAllReviews() // טוען מחדש את כל הביקורות כדי לעדכן את הרשימה במסך הבית
         }
     }
+
+    fun getReviewsByUser(userId: String): LiveData<List<Review>> {
+        return repository.getReviewsByUser(userId)
+    }
+
 }

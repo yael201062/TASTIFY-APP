@@ -18,6 +18,10 @@ class UserRepository(private val userDao: UserDao) {
         return userDao.getUserById(userId)
     }
 
+    fun getUserNameById(userId: String): LiveData<String?> {
+        return userDao.getUserNameById(userId)
+    }
+
     suspend fun updateUser(user: User) {
         withContext(Dispatchers.IO) {
             userDao.updateUser(user)

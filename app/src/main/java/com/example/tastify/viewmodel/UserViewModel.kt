@@ -11,6 +11,10 @@ class UserViewModel(private val repository: UserRepository) : ViewModel() {
     private val _currentUser = MutableLiveData<User?>()
     val currentUser: LiveData<User?> get() = _currentUser
 
+    fun getUserName(userId: String): LiveData<String?> {
+        return repository.getUserNameById(userId)
+    }
+
     fun loadUser(userId: String) {
         repository.getUserById(userId).observeForever { user ->
             if (user == null) {
