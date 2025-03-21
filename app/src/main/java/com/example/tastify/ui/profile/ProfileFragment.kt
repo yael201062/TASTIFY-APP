@@ -11,6 +11,7 @@ import com.example.tastify.R
 import com.example.tastify.data.dao.repository.UserRepository
 import com.example.tastify.data.database.AppDatabase
 import com.example.tastify.databinding.FragmentProfileBinding
+import com.example.tastify.util.LogoutHelper
 import com.example.tastify.viewmodel.UserViewModel
 import com.google.firebase.auth.FirebaseAuth
 import com.squareup.picasso.Picasso
@@ -74,6 +75,11 @@ class ProfileFragment : Fragment() {
         binding.btnEditProfile.setOnClickListener {
             findNavController().navigate(R.id.action_profileFragment_to_editProfileFragment)
         }
+
+        binding.btnLogout.setOnClickListener {
+            LogoutHelper.performLogout(requireContext(), findNavController())
+        }
+
     }
 
     override fun onDestroyView() {

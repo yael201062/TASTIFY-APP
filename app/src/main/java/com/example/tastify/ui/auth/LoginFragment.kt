@@ -13,6 +13,7 @@ import com.example.tastify.R
 import com.example.tastify.data.database.AppDatabase
 import com.example.tastify.data.dao.repository.UserRepository
 import com.example.tastify.databinding.FragmentLoginBinding
+import com.example.tastify.util.AuthManager
 import com.example.tastify.viewmodel.UserViewModel
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
@@ -63,6 +64,8 @@ class LoginFragment : Fragment() {
 
                             userViewModel.currentUser.observe(viewLifecycleOwner) { user ->
                                 if (user != null) {
+                                    val uid = user.id
+                                    AuthManager.saveUserUid(requireContext(), uid)
                                     findNavController().navigate(R.id.action_loginFragment_to_homeFragment)
                                 } else {
                                     Toast.makeText(requireContext(), "User not found", Toast.LENGTH_SHORT).show()

@@ -35,7 +35,7 @@
         android:id="@+id/etSearch"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:hint="Search restaurants..."
+        android:hint="חיפוש מסעדות.."
         android:layout_marginTop="16dp"
         android:padding="12dp"
         android:background="@android:drawable/edit_text"
