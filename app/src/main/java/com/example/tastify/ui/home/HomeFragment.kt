@@ -56,9 +56,6 @@ class HomeFragment : Fragment() {
             findNavController().navigate(R.id.addReviewFragment)
         }
 
-        binding.btnPersonalArea.setOnClickListener {
-            findNavController().navigate(R.id.myPostsFragment)
-        }
 
         return binding.root
     }

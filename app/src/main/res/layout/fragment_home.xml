@@ -22,24 +22,14 @@
 
         <TextView
             android:id="@+id/tvWelcome"
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
             android:text="Welcome to Tastify!"
             android:textSize="28sp"
             android:textStyle="bold"
             android:textColor="#FF5722" />
-
-        <Button
-            android:id="@+id/btnPersonalArea"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="אזור אישי"
-            android:textColor="@android:color/white"
-            android:backgroundTint="#3F51B5"
-            android:elevation="4dp"
-            android:padding="10dp" />
     </LinearLayout>
+
 
     <!-- תיבת חיפוש -->
     <EditText
