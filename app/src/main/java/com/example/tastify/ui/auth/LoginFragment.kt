@@ -54,8 +54,16 @@ class LoginFragment : Fragment() {
             if (email.isEmpty() || password.isEmpty()) {
                 Toast.makeText(requireContext(), "Please fill all fields", Toast.LENGTH_SHORT).show()
             } else {
+                // הצגת עיגול מסתובב והשבתת כפתור
+                binding.progressBar.visibility = View.VISIBLE
+                binding.btnLogin.isEnabled = false
+
                 auth.signInWithEmailAndPassword(email, password)
                     .addOnCompleteListener { task ->
+                        // הסתרת עיגול והשבתת כפתור
+                        binding.progressBar.visibility = View.GONE
+                        binding.btnLogin.isEnabled = true
+
                         if (task.isSuccessful) {
                             val userId = auth.currentUser?.uid ?: return@addOnCompleteListener
                             lifecycleScope.launch {

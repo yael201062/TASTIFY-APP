@@ -54,6 +54,9 @@ class RegisterFragment : Fragment() {
             } else if (password != confirmPassword) {
                 Toast.makeText(requireContext(), "הסיסמאות לא תואמות", Toast.LENGTH_SHORT).show()
             } else {
+                // הצגת ProgressBar
+                binding.progressBar.visibility = View.VISIBLE
+                binding.btnRegister.isEnabled = false
                 registerUser(name, email, password)
             }
         }
@@ -62,6 +65,10 @@ class RegisterFragment : Fragment() {
     private fun registerUser(name: String, email: String, password: String) {
         auth.createUserWithEmailAndPassword(email, password)
             .addOnCompleteListener(requireActivity()) { task ->
+                // הסתרת ProgressBar
+                binding.progressBar.visibility = View.GONE
+                binding.btnRegister.isEnabled = true
+
                 if (task.isSuccessful) {
                     val userId = auth.currentUser?.uid ?: return@addOnCompleteListener
                     val user = User(id = userId, name = name, email = email, profileImageUrl = "")
