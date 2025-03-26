@@ -11,5 +11,8 @@
     <color name="colorPrimaryDark">#1565C0</color>
     <color name="colorAccent">#FF4081</color>
     <color name="textColorPrimary">#212121</color>
+    <color name="nav_item_selected">#009688</color>
+    <color name="nav_item_unselected">#888888</color>
+
 
 </resources>
