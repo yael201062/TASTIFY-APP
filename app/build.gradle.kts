@@ -107,5 +107,7 @@ dependencies {
 
         // optional - Paging 3 Integration
     implementation("androidx.room:room-paging:$roomversion")
+    implementation ("jp.wasabeef:picasso-transformations:2.4.0")
+
 }
 

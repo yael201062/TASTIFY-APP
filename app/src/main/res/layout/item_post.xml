@@ -14,16 +14,31 @@
         android:padding="16dp"
         android:orientation="vertical">
 
-        <!-- שם המשתמש -->
-        <TextView
-            android:id="@+id/tvPostUserName"
-            android:layout_width="wrap_content"
+        <!-- אזור תמונת פרופיל + שם -->
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textStyle="bold"
-            android:textSize="16sp"
-            android:textColor="@android:color/black"/>
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="8dp">
 
-        <!-- שם המסעדה -->
+            <ImageView
+                android:id="@+id/ivProfileImage"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:scaleType="centerCrop"
+                android:src="@drawable/ic_launcher_foreground"
+                android:layout_marginEnd="8dp" />
+
+            <TextView
+                android:id="@+id/tvPostUserName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textStyle="bold"
+                android:textSize="16sp"
+                android:textColor="@android:color/black"/>
+        </LinearLayout>
+
         <TextView
             android:id="@+id/tvRestaurantName"
             android:layout_width="wrap_content"
@@ -33,7 +48,6 @@
             android:textColor="@android:color/darker_gray"
             android:layout_marginBottom="4dp"/>
 
-        <!-- דירוג -->
         <RatingBar
             android:id="@+id/ratingBar"
             android:layout_width="wrap_content"
@@ -44,7 +58,6 @@
             style="?android:attr/ratingBarStyleSmall"
             android:layout_marginBottom="8dp"/>
 
-        <!-- תמונה אם קיימת -->
         <ImageView
             android:id="@+id/ivPostImage"
             android:layout_width="match_parent"
@@ -53,7 +66,6 @@
             android:layout_marginTop="8dp"
             android:visibility="gone"/>
 
-        <!-- תוכן הביקורת -->
         <TextView
             android:id="@+id/tvPostContent"
             android:layout_width="match_parent"

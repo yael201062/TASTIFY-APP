@@ -14,6 +14,9 @@ class UserViewModel(private val repository: UserRepository) : ViewModel() {
     fun getUserName(userId: String): LiveData<String?> {
         return repository.getUserNameById(userId)
     }
+    fun getUserById(userId: String): LiveData<User?> {
+        return repository.getUserById(userId)
+    }
 
     fun loadUser(userId: String) {
         repository.getUserById(userId).observeForever { user ->

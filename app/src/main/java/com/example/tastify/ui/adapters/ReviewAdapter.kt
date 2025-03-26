@@ -17,17 +17,16 @@ import com.example.tastify.data.dao.repository.UserRepository
 import com.example.tastify.data.model.Review
 import com.example.tastify.viewmodel.UserViewModel
 import com.squareup.picasso.Picasso
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import okhttp3.Call
-import okhttp3.Callback
-import okhttp3.Response
+import jp.wasabeef.picasso.transformations.CropCircleTransformation
+import okhttp3.*
 import org.json.JSONObject
 import java.io.File
 import java.io.IOException
 
-class ReviewsAdapter(private var reviews: MutableList<Review>,  private val isEditable: Boolean = false) :
-    RecyclerView.Adapter<ReviewsAdapter.ReviewViewHolder>() {
+class ReviewsAdapter(
+    private var reviews: MutableList<Review>,
+    private val isEditable: Boolean = false
+) : RecyclerView.Adapter<ReviewsAdapter.ReviewViewHolder>() {
 
     class ReviewViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val txtUserName: TextView = view.findViewById(R.id.tvPostUserName)
@@ -35,6 +34,7 @@ class ReviewsAdapter(private var reviews: MutableList<Review>,  private val isEd
         val ratingBar: RatingBar = view.findViewById(R.id.ratingBar)
         val txtComment: TextView = view.findViewById(R.id.tvPostContent)
         val imgReview: ImageView = view.findViewById(R.id.ivPostImage)
+        val imgUserProfile: ImageView = view.findViewById(R.id.ivProfileImage)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ReviewViewHolder {
@@ -47,27 +47,38 @@ class ReviewsAdapter(private var reviews: MutableList<Review>,  private val isEd
         val review = reviews[position]
         val context = holder.itemView.context
 
-        holder.txtUserName.text = "טוען שם..."
-
-        // יצירת UserViewModel באופן ידני בתוך האדפטר
+        // יצירת UserViewModel
         val userDao = AppDatabase.getDatabase(context).userDao()
         val repository = UserRepository(userDao)
         val factory = UserViewModel.Factory(repository)
-
         val userViewModel = ViewModelProvider(
             context as androidx.lifecycle.ViewModelStoreOwner,
             factory
         )[UserViewModel::class.java]
 
-        userViewModel.getUserName(review.userId)
-            .observe(context as LifecycleOwner) { name ->
-                holder.txtUserName.text = name ?: "משתמש לא ידוע"
+        // טען את שם המשתמש + תמונת פרופיל
+        userViewModel.getUserById(review.userId)
+            .observe(context as LifecycleOwner) { user ->
+                holder.txtUserName.text = user?.name ?: "משתמש לא ידוע"
+
+                val profileUrl = user?.profileImageUrl
+                if (!profileUrl.isNullOrEmpty()) {
+                    Picasso.get()
+                        .load(profileUrl)
+                        .placeholder(R.drawable.ic_profile_placeholder)
+                        .error(R.drawable.ic_profile_placeholder)
+                        .transform(CropCircleTransformation())
+                        .into(holder.imgUserProfile)
+                } else {
+                    holder.imgUserProfile.setImageResource(R.drawable.ic_profile_placeholder)
+                }
             }
 
-
+        // אם ניתן לערוך
         if (isEditable) {
             holder.itemView.setOnClickListener {
-                val action = MyPostsFragmentDirections.actionMyPostsFragmentToEditReviewFragment(review.id.toString())
+                val action = MyPostsFragmentDirections
+                    .actionMyPostsFragmentToEditReviewFragment(review.id.toString())
                 it.findNavController().navigate(action)
             }
         }
@@ -76,14 +87,15 @@ class ReviewsAdapter(private var reviews: MutableList<Review>,  private val isEd
         holder.ratingBar.rating = review.rating
         holder.txtComment.text = review.comment
 
+        // טען תמונה של הביקורת אם קיימת
         if (!review.imagePath.isNullOrEmpty()) {
             val file = File(review.imagePath)
             if (file.exists()) {
                 holder.imgReview.visibility = View.VISIBLE
                 Picasso.get().load(file).into(holder.imgReview)
             }
-        }else {
-            // טען תמונה רנדומלית של אוכל מ-Unsplash אם אין imagePath
+        } else {
+            // טען תמונת אוכל רנדומלית מ-Unsplash אם אין תמונה
             val client = OkHttpClient()
             val request = Request.Builder()
                 .url("https://api.unsplash.com/photos/random?query=food&client_id=0c3PEFtuji3Yu2TyMg9M4XKB-dh1KWKFrK2ldqy--mk")
@@ -96,8 +108,7 @@ class ReviewsAdapter(private var reviews: MutableList<Review>,  private val isEd
 
                 override fun onResponse(call: Call, response: Response) {
                     response.use {
-                        val json = it.body?.string() ?: return
-                        val imageUrl = JSONObject(json)
+                        val imageUrl = JSONObject(it.body?.string() ?: return)
                             .getJSONObject("urls")
                             .getString("regular")
 

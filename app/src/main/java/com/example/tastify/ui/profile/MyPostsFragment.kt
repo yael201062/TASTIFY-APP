@@ -55,9 +55,6 @@ class MyPostsFragment : Fragment() {
             binding.tvMyPostsTitle.text = "אין משתמש מחובר"
         }
 
-        binding.btnUpdateProfile.setOnClickListener {
-            findNavController().navigate(R.id.profileFragment)
-        }
     }
 
     override fun onDestroyView() {
