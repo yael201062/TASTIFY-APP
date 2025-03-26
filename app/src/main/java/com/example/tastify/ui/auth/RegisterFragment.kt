@@ -54,13 +54,18 @@ class RegisterFragment : Fragment() {
             } else if (password != confirmPassword) {
                 Toast.makeText(requireContext(), "הסיסמאות לא תואמות", Toast.LENGTH_SHORT).show()
             } else {
-                // הצגת ProgressBar
                 binding.progressBar.visibility = View.VISIBLE
                 binding.btnRegister.isEnabled = false
                 registerUser(name, email, password)
             }
         }
+
+        // ✅ מעבר למסך התחברות
+        binding.tvGoToLogin.setOnClickListener {
+            findNavController().navigate(R.id.action_registerFragment_to_loginFragment)
+        }
     }
+
 
     private fun registerUser(name: String, email: String, password: String) {
         auth.createUserWithEmailAndPassword(email, password)

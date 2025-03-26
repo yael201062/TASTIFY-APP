@@ -29,25 +29,27 @@ class MainActivity : AppCompatActivity() {
 
         val navController = navHostFragment.navController
 
-        // מסכים שבהם אין כפתור "חזור" ב-ActionBar
+        // מסכים שאין בהם כפתור חזור
         appBarConfiguration = AppBarConfiguration(
             setOf(R.id.homeFragment, R.id.profileFragment, R.id.myPostsFragment)
         )
 
-        // קישור ActionBar
+        // קישור ActionBar ל־NavController
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration)
 
-        // קישור Bottom Navigation ל-Navigation Controller
+        // קישור Bottom Navigation
         binding.bottomNav.setupWithNavController(navController)
 
-        // הסתרת ה־Bottom Nav במסכים של login/register
+        // שליטה על תצוגת BottomNav ו־ActionBar
         navController.addOnDestinationChangedListener { _, destination, _ ->
             when (destination.id) {
                 R.id.loginFragment, R.id.registerFragment -> {
                     binding.bottomNav.visibility = View.GONE
+                    supportActionBar?.hide() // 👈 הסתרת ActionBar לגמרי
                 }
                 else -> {
                     binding.bottomNav.visibility = View.VISIBLE
+                    supportActionBar?.show() // 👈 הצגת ActionBar במסכים אחרים
                 }
             }
         }
