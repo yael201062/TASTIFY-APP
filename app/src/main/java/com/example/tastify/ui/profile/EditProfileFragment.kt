@@ -4,10 +4,10 @@ import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.provider.MediaStore
+import android.view.*
 import android.widget.Toast
+import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
@@ -21,21 +21,23 @@ import com.example.tastify.viewmodel.UserViewModel
 import com.google.firebase.auth.FirebaseAuth
 import com.squareup.picasso.Picasso
 import kotlinx.coroutines.launch
+import java.io.File
+import java.text.SimpleDateFormat
+import java.util.*
 
 class EditProfileFragment : Fragment() {
 
     private var _binding: FragmentEditProfileBinding? = null
     private val binding get() = _binding!!
 
-    // ViewModel + Repository
     private lateinit var userViewModel: UserViewModel
     private var selectedImageUri: Uri? = null
     private var currentUser: User? = null
+    private var photoUri: Uri? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // אתחול ה-ViewModel עם UserRepository
         val userDao = AppDatabase.getDatabase(requireContext()).userDao()
         val userRepository = UserRepository(userDao)
 
@@ -53,8 +55,8 @@ class EditProfileFragment : Fragment() {
 
         val firebaseUser = FirebaseAuth.getInstance().currentUser
         if (firebaseUser != null) {
-            val userId = firebaseUser.uid  // 🔹 קבלת ה-UID של המשתמש המחובר
-            userViewModel.loadUser(userId) // טוען את הנתונים של המשתמש מהמסד
+            val userId = firebaseUser.uid
+            userViewModel.loadUser(userId)
 
             userViewModel.currentUser.observe(viewLifecycleOwner) { user ->
                 user?.let {
@@ -73,12 +75,50 @@ class EditProfileFragment : Fragment() {
         }
 
         binding.btnSelectImage.setOnClickListener {
-            selectImageFromGallery()
+            showImagePickerOptions()
         }
 
         binding.btnSave.setOnClickListener {
             saveUserData()
         }
+    }
+
+    private fun showImagePickerOptions() {
+        val options = arrayOf("בחר מהגלריה", "צלם תמונה")
+        android.app.AlertDialog.Builder(requireContext())
+            .setTitle("בחר תמונת פרופיל")
+            .setItems(options) { _, which ->
+                when (which) {
+                    0 -> selectImageFromGallery()
+                    1 -> takePhotoWithCamera()
+                }
+            }.show()
+    }
+
+    private fun selectImageFromGallery() {
+        val intent = Intent(Intent.ACTION_PICK)
+        intent.type = "image/*"
+        startActivityForResult(intent, 1001)
+    }
+
+    private fun takePhotoWithCamera() {
+        val photoFile = createImageFile()
+        photoUri = FileProvider.getUriForFile(
+            requireContext(),
+            "${requireContext().packageName}.provider",
+            photoFile
+        )
+        val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE).apply {
+            putExtra(MediaStore.EXTRA_OUTPUT, photoUri)
+        }
+        startActivityForResult(intent, 1002)
+    }
+
+    private fun createImageFile(): File {
+        val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
+        val fileName = "IMG_$timestamp.jpg"
+        val storageDir = requireContext().cacheDir
+        return File(storageDir, fileName)
     }
 
     private fun saveUserData() {
@@ -91,21 +131,16 @@ class EditProfileFragment : Fragment() {
             return
         }
 
-        val profileImageUrl = selectedImageUri?.toString() ?: currentUser?.profileImageUrl ?: ""
+        val imageUri = selectedImageUri ?: photoUri
+        val profileImageUrl = imageUri?.toString() ?: currentUser?.profileImageUrl ?: ""
 
         val updatedUser = User(id = userId, name = name, email = email, profileImageUrl = profileImageUrl)
 
         lifecycleScope.launch {
             userViewModel.updateUser(updatedUser)
             Toast.makeText(requireContext(), "הפרופיל עודכן בהצלחה", Toast.LENGTH_SHORT).show()
-            findNavController().popBackStack() // חזרה לעמוד הפרופיל
+            findNavController().popBackStack()
         }
-    }
-
-    private fun selectImageFromGallery() {
-        val intent = Intent(Intent.ACTION_PICK)
-        intent.type = "image/*"
-        startActivityForResult(intent, 1001)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -113,6 +148,10 @@ class EditProfileFragment : Fragment() {
         if (requestCode == 1001 && resultCode == Activity.RESULT_OK) {
             selectedImageUri = data?.data
             binding.ivProfileImage.setImageURI(selectedImageUri)
+        } else if (requestCode == 1002 && resultCode == Activity.RESULT_OK) {
+            photoUri?.let {
+                binding.ivProfileImage.setImageURI(it)
+            }
         }
     }
 

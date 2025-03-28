@@ -1,5 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools">
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.example.tastify">
 
     <application
         android:allowBackup="true"
@@ -9,15 +10,30 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.DayNight"
         tools:targetApi="31">
+
+        <!-- ✅ הוספת FileProvider -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.provider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/provider_paths" />
+        </provider>
+
+        <!-- 🟡 רכיב של מודעות (אם אתה משתמש בזה) -->
         <meta-data
             android:name="com.google.android.gms.ads.DELAY_APP_MEASUREMENT_INIT"
-            android:value="true"/>
+            android:value="true" />
         <provider
             android:name="com.google.android.gms.ads.MobileAdsInitProvider"
             android:authorities="${applicationId}.mobileadsinitprovider"
             android:enabled="false"
             android:exported="false"
-            tools:node="remove"/>
+            tools:node="remove" />
+
+        <!-- 🔹 MainActivity -->
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -30,4 +46,5 @@
         </activity>
 
     </application>
+
 </manifest>
