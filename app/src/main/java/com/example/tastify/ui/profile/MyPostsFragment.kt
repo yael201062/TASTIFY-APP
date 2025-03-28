@@ -7,9 +7,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
-import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.tastify.R
 import com.example.tastify.data.database.AppDatabase
 import com.example.tastify.data.dao.repository.ReviewRepository
 import com.example.tastify.databinding.FragmentMyPostsBinding
@@ -48,13 +46,24 @@ class MyPostsFragment : Fragment() {
         if (currentUser != null) {
             val userId = currentUser.uid
 
-            reviewViewModel.getReviewsByUser(userId).observe(viewLifecycleOwner, Observer { reviews ->
-                adapter.updateData(reviews.toMutableList())
-            })
+            // טוען פעם ראשונה
+            loadUserReviews(userId)
+
+            // מאפשר רענון ידני
+            binding.swipeRefreshLayout.setOnRefreshListener {
+                loadUserReviews(userId)
+            }
         } else {
             binding.tvMyPostsTitle.text = "אין משתמש מחובר"
         }
+    }
 
+    private fun loadUserReviews(userId: String) {
+        binding.swipeRefreshLayout.isRefreshing = true
+        reviewViewModel.getReviewsByUser(userId).observe(viewLifecycleOwner, Observer { reviews ->
+            adapter.updateData(reviews.toMutableList())
+            binding.swipeRefreshLayout.isRefreshing = false
+        })
     }
 
     override fun onDestroyView() {

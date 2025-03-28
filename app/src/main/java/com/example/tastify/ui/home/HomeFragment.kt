@@ -16,8 +16,6 @@ import com.example.tastify.viewmodel.ReviewViewModel
 import com.example.tastify.viewmodel.ReviewViewModelFactory
 import kotlinx.coroutines.launch
 
-
-
 class HomeFragment : Fragment() {
 
     private var _binding: FragmentHomeBinding? = null
@@ -41,7 +39,7 @@ class HomeFragment : Fragment() {
 
         observeAllReviews()
 
-        // כפתור חיפוש לפי restaurantId
+        // כפתור חיפוש
         binding.btnSearch.setOnClickListener {
             val searchQuery = binding.etSearch.text.toString().trim()
             if (searchQuery.isNotEmpty()) {
@@ -51,11 +49,16 @@ class HomeFragment : Fragment() {
             }
         }
 
-        // ניווטים
+        // הוספת ביקורת
         binding.fabAddReview.setOnClickListener {
             findNavController().navigate(R.id.addReviewFragment)
         }
 
+        // רענון ע"י משיכה
+        binding.swipeRefreshLayout.setOnRefreshListener {
+            reviewViewModel.loadAllReviews()
+            binding.swipeRefreshLayout.isRefreshing = false
+        }
 
         return binding.root
     }
@@ -81,11 +84,8 @@ class HomeFragment : Fragment() {
         reviewViewModel.loadAllReviews()
     }
 
-
-
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
     }
 }
-

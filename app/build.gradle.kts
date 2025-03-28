@@ -109,5 +109,7 @@ dependencies {
     implementation("androidx.room:room-paging:$roomversion")
     implementation ("jp.wasabeef:picasso-transformations:2.4.0")
 
+    implementation ("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
+
 }
 
