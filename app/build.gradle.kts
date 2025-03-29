@@ -111,6 +111,9 @@ dependencies {
     implementation ("jp.wasabeef:picasso-transformations:2.4.0")
 
     implementation ("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+    implementation("org.json:json:20230227")
+
 
 }
 

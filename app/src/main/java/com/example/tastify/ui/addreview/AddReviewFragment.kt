@@ -19,6 +19,11 @@ import com.example.tastify.viewmodel.ReviewViewModelFactory
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.tasks.await
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.RequestBody
+import org.json.JSONObject
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
@@ -63,6 +68,17 @@ class AddReviewFragment : Fragment() {
             }
 
             uploadImageAndAddReview(restaurantName, comment, rating, currentUser.uid)
+        }
+
+        binding.btnGenerateReview.setOnClickListener {
+            val name = binding.etRestaurantName.text.toString().trim()
+            val rating = binding.ratingBar.rating
+
+            if (name.isEmpty() || rating == 0f) {
+                Toast.makeText(requireContext(), "נא למלא שם מסעדה ולבחור דירוג", Toast.LENGTH_SHORT).show()
+            } else {
+                generateReviewWithGemini(name, rating)
+            }
         }
 
         return binding.root
@@ -123,7 +139,12 @@ class AddReviewFragment : Fragment() {
         }
     }
 
-    private fun uploadImageAndAddReview(restaurantName: String, comment: String, rating: Float, userId: String) {
+    private fun uploadImageAndAddReview(
+        restaurantName: String,
+        comment: String,
+        rating: Float,
+        userId: String
+    ) {
         if (selectedImageUri == null) {
             saveReviewToFirestore(userId, restaurantName, comment, rating, null)
             return
@@ -146,7 +167,13 @@ class AddReviewFragment : Fragment() {
             }
     }
 
-    private fun saveReviewToFirestore(userId: String, restaurantName: String, comment: String, rating: Float, imageUrl: String?) {
+    private fun saveReviewToFirestore(
+        userId: String,
+        restaurantName: String,
+        comment: String,
+        rating: Float,
+        imageUrl: String?
+    ) {
         val review = Review(
             restaurantId = restaurantName,
             userId = userId,
@@ -159,6 +186,75 @@ class AddReviewFragment : Fragment() {
         Toast.makeText(requireContext(), "הביקורת נוספה בהצלחה", Toast.LENGTH_SHORT).show()
         findNavController().navigateUp()
     }
+    private fun generateReviewWithGemini(restaurantName: String, rating: Float) {
+        val prompt =
+            "כתוב ביקורת בעברית באורך שורה על מסעדה בשם \"$restaurantName\" עם דירוג של $rating כוכבים. תאר את האוכל, השירות והאווירה בהתאם לדירוג."
+
+        val promptJsonSafe = JSONObject.quote(prompt)
+
+        val url = "https://generativelanguage.googleapis.com/v1/models/gemini-1.5-pro-002:generateContent?key=AIzaSyBQZU4_AGMRIvFf-B5Jo2QxVkqt2v8749E"
+
+        val json = """
+        {
+          "contents": [
+            {
+              "parts": [
+                {
+                  "text": $promptJsonSafe
+                }
+              ]
+            }
+          ]
+        }
+    """.trimIndent()
+
+        val body = RequestBody.create("application/json; charset=utf-8".toMediaTypeOrNull(), json)
+        val request = Request.Builder().url(url).post(body).build()
+        val client = OkHttpClient()
+
+        Thread {
+            try {
+                val response = client.newCall(request).execute()
+                val responseString = response.body?.string()
+
+                println("RESPONSE: $responseString")
+
+                val jsonObject = JSONObject(responseString)
+
+                if (jsonObject.has("candidates")) {
+                    val candidates = jsonObject.getJSONArray("candidates")
+                    val content = candidates.getJSONObject(0)
+                        .getJSONObject("content")
+                        .getJSONArray("parts")
+                        .getJSONObject(0)
+                        .getString("text")
+
+                    activity?.runOnUiThread {
+                        binding.etReviewContent.setText(content)
+                        Toast.makeText(requireContext(), "הביקורת נוצרה בהצלחה", Toast.LENGTH_SHORT).show()
+                    }
+                } else if (jsonObject.has("error")) {
+                    val error = jsonObject.getJSONObject("error").getString("message")
+                    activity?.runOnUiThread {
+                        Toast.makeText(requireContext(), "שגיאת Gemini: $error", Toast.LENGTH_LONG).show()
+                    }
+                } else {
+                    activity?.runOnUiThread {
+                        Toast.makeText(requireContext(), "תגובה לא צפויה מ-Gemini", Toast.LENGTH_LONG).show()
+                    }
+                }
+            } catch (e: Exception) {
+                activity?.runOnUiThread {
+                    Toast.makeText(requireContext(), "שגיאה כללית ביצירת הביקורת", Toast.LENGTH_LONG).show()
+                }
+                e.printStackTrace()
+            }
+        }.start()
+    }
+
+
+
+
 
     override fun onDestroyView() {
         super.onDestroyView()

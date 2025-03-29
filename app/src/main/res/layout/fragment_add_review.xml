@@ -31,7 +31,6 @@
         android:hint="שם המסעדה"
         android:padding="12dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tvTitle" />
 
@@ -43,8 +42,12 @@
         android:background="@android:drawable/edit_text"
         android:hint="תוכן הביקורת"
         android:padding="12dp"
+        android:maxLines="3"
+        android:scrollbars="vertical"
+        android:inputType="textMultiLine"
+        android:overScrollMode="always"
+        android:gravity="top|start"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/etRestaurantName" />
 
@@ -56,21 +59,32 @@
         android:numStars="5"
         android:stepSize="0.5"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.495"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/etReviewContent" />
+
+    <Button
+        android:id="@+id/btnGenerateReview"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:backgroundTint="@color/colorAccent"
+        android:text="ניסוח אוטומטי"
+        android:textColor="@android:color/white"
+        app:layout_constraintTop_toBottomOf="@id/ratingBar"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
 
     <Button
         android:id="@+id/btnSelectImage"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="128dp"
-        android:layout_marginTop="32dp"
+        android:layout_marginTop="16dp"
         android:backgroundTint="@color/colorPrimary"
         android:text="בחר תמונה"
         android:textColor="@android:color/white"
+        app:layout_constraintTop_toBottomOf="@id/btnGenerateReview"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/ratingBar" />
+        app:layout_constraintEnd_toEndOf="parent"/>
 
     <ImageView
         android:id="@+id/ivSelectedImage"
@@ -88,12 +102,11 @@
         android:id="@+id/btnSubmitReview"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
+        android:layout_marginTop="12dp"
         android:backgroundTint="@color/colorPrimary"
         android:text="שלח ביקורת"
         android:textColor="@android:color/white"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/ivSelectedImage" />
 
