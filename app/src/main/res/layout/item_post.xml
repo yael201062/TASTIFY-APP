@@ -14,7 +14,7 @@
         android:padding="16dp"
         android:orientation="vertical">
 
-        <!-- אזור תמונת פרופיל + שם -->
+        <!-- תמונת פרופיל + שם -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -72,5 +72,32 @@
             android:layout_height="wrap_content"
             android:textSize="14sp"
             android:layout_marginTop="8dp"/>
+
+        <!-- 🔹 אייקונים של עריכה ומחיקה -->
+        <LinearLayout
+            android:id="@+id/btnActionsContainer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:orientation="horizontal"
+            android:gravity="end"
+            android:layout_gravity="end">
+
+            <ImageView
+                android:id="@+id/btnEdit"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_edit"
+                android:layout_marginEnd="16dp"
+                android:contentDescription="ערוך" />
+
+            <ImageView
+                android:id="@+id/btnDelete"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_delete"
+                android:contentDescription="מחק" />
+        </LinearLayout>
+
     </LinearLayout>
 </androidx.cardview.widget.CardView>
