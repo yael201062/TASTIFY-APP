@@ -10,6 +10,7 @@ import android.widget.Toast
 import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.example.tastify.data.dao.repository.ReviewRepository
@@ -19,7 +20,7 @@ import com.example.tastify.viewmodel.ReviewViewModel
 import com.example.tastify.viewmodel.ReviewViewModelFactory
 import com.google.firebase.storage.FirebaseStorage
 import com.squareup.picasso.Picasso
-import kotlinx.coroutines.*
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import java.io.File
 import java.text.SimpleDateFormat
@@ -32,12 +33,13 @@ class EditReviewFragment : Fragment() {
 
     private val args: EditReviewFragmentArgs by navArgs()
     private var currentReview: Review? = null
-    private var selectedImageUri: Uri? = null
-    private var photoUri: Uri? = null
 
     private val reviewViewModel: ReviewViewModel by viewModels {
         ReviewViewModelFactory(ReviewRepository())
     }
+
+    private var selectedImageUri: Uri? = null
+    private var photoUri: Uri? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -59,6 +61,7 @@ class EditReviewFragment : Fragment() {
                 binding.etReviewContent.setText(review.comment)
                 binding.ratingBar.rating = review.rating
 
+                // טען תמונה קיימת אם יש
                 if (!review.imagePath.isNullOrEmpty()) {
                     Picasso.get().load(review.imagePath).into(binding.ivSelectedImage)
                 }
@@ -68,10 +71,6 @@ class EditReviewFragment : Fragment() {
             }
         }
 
-        binding.btnSelectImage.setOnClickListener {
-            selectImageFromGallery()
-        }
-
         binding.btnSaveReview.setOnClickListener {
             saveReview()
         }
@@ -79,13 +78,49 @@ class EditReviewFragment : Fragment() {
         binding.btnDeleteReview.setOnClickListener {
             deleteReview()
         }
+
+        binding.btnSelectImage.setOnClickListener {
+            showImagePickerDialog()
+        }
+    }
+
+    private fun showImagePickerDialog() {
+        val options = arrayOf("בחר מהגלריה", "צלם תמונה")
+        android.app.AlertDialog.Builder(requireContext())
+            .setTitle("בחר תמונה")
+            .setItems(options) { _, which ->
+                when (which) {
+                    0 -> selectImageFromGallery()
+                    1 -> takePhotoWithCamera()
+                }
+            }
+            .show()
     }
 
     private fun selectImageFromGallery() {
-        val intent = Intent(Intent.ACTION_PICK).apply {
-            type = "image/*"
+        val intent = Intent(Intent.ACTION_PICK)
+        intent.type = "image/*"
+        startActivityForResult(intent, 1001)
+    }
+
+    private fun takePhotoWithCamera() {
+        val photoFile = createImageFile()
+        photoUri = FileProvider.getUriForFile(
+            requireContext(),
+            "${requireContext().packageName}.provider",
+            photoFile
+        )
+        val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE).apply {
+            putExtra(MediaStore.EXTRA_OUTPUT, photoUri)
         }
-        startActivityForResult(intent, 3001)
+        startActivityForResult(intent, 1002)
+    }
+
+    private fun createImageFile(): File {
+        val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
+        val fileName = "IMG_$timestamp.jpg"
+        val storageDir = requireContext().cacheDir
+        return File(storageDir, fileName)
     }
 
     private fun saveReview() {
@@ -98,28 +133,34 @@ class EditReviewFragment : Fragment() {
             return
         }
 
-        val review = currentReview ?: return
+        val localUri = selectedImageUri ?: photoUri
 
-        // 🚀 העלאת תמונה חדשה אם נבחרה
-        CoroutineScope(Dispatchers.Main).launch {
-            val newImageUrl = selectedImageUri?.let { uploadImageToFirebase(it, review.id) }
-            val updatedReview = review.copy(
+        lifecycleScope.launch {
+            val imageUrl = if (localUri != null) {
+                uploadImageToFirebase(localUri)
+            } else {
+                currentReview?.imagePath
+            }
+
+            val updatedReview = currentReview?.copy(
                 restaurantId = restaurantName,
                 comment = comment,
                 rating = rating,
-                imagePath = newImageUrl ?: review.imagePath
+                imagePath = imageUrl
             )
 
-            reviewViewModel.updateReview(updatedReview)
-            Toast.makeText(requireContext(), "הביקורת עודכנה בהצלחה", Toast.LENGTH_SHORT).show()
-            findNavController().navigateUp()
+            if (updatedReview != null) {
+                reviewViewModel.updateReview(updatedReview)
+                Toast.makeText(requireContext(), "הביקורת עודכנה בהצלחה", Toast.LENGTH_SHORT).show()
+                findNavController().navigateUp()
+            }
         }
     }
 
-    private suspend fun uploadImageToFirebase(uri: Uri, reviewId: String): String? {
+    private suspend fun uploadImageToFirebase(uri: Uri): String? {
         return try {
-            val storageRef = FirebaseStorage.getInstance()
-                .reference.child("review_images/${reviewId}_${System.currentTimeMillis()}.jpg")
+            val storageRef = FirebaseStorage.getInstance().reference
+                .child("review_images/${System.currentTimeMillis()}.jpg")
             storageRef.putFile(uri).await()
             storageRef.downloadUrl.await().toString()
         } catch (e: Exception) {
@@ -138,9 +179,13 @@ class EditReviewFragment : Fragment() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == 3001 && resultCode == Activity.RESULT_OK) {
+        if (requestCode == 1001 && resultCode == Activity.RESULT_OK) {
             selectedImageUri = data?.data
             binding.ivSelectedImage.setImageURI(selectedImageUri)
+        } else if (requestCode == 1002 && resultCode == Activity.RESULT_OK) {
+            photoUri?.let {
+                binding.ivSelectedImage.setImageURI(it)
+            }
         }
     }
 

@@ -4,8 +4,10 @@ import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.provider.MediaStore
 import android.view.*
 import android.widget.Toast
+import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
@@ -16,6 +18,10 @@ import com.example.tastify.viewmodel.ReviewViewModel
 import com.example.tastify.viewmodel.ReviewViewModelFactory
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.storage.FirebaseStorage
+import kotlinx.coroutines.tasks.await
+import java.io.File
+import java.text.SimpleDateFormat
+import java.util.*
 
 class AddReviewFragment : Fragment() {
 
@@ -27,6 +33,7 @@ class AddReviewFragment : Fragment() {
     }
 
     private var selectedImageUri: Uri? = null
+    private var photoUri: Uri? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -35,7 +42,7 @@ class AddReviewFragment : Fragment() {
         _binding = FragmentAddReviewBinding.inflate(inflater, container, false)
 
         binding.btnSelectImage.setOnClickListener {
-            selectImageFromGallery()
+            showImagePickerDialog()
         }
 
         binding.btnSubmitReview.setOnClickListener {
@@ -61,17 +68,58 @@ class AddReviewFragment : Fragment() {
         return binding.root
     }
 
+    private fun showImagePickerDialog() {
+        val options = arrayOf("בחר מהגלריה", "צלם תמונה")
+        android.app.AlertDialog.Builder(requireContext())
+            .setTitle("הוספת תמונה")
+            .setItems(options) { _, which ->
+                when (which) {
+                    0 -> selectImageFromGallery()
+                    1 -> takePhotoWithCamera()
+                }
+            }
+            .show()
+    }
+
     private fun selectImageFromGallery() {
         val intent = Intent(Intent.ACTION_PICK)
         intent.type = "image/*"
         startActivityForResult(intent, 2001)
     }
 
+    private fun takePhotoWithCamera() {
+        val photoFile = createImageFile()
+        photoUri = FileProvider.getUriForFile(
+            requireContext(),
+            "${requireContext().packageName}.provider",
+            photoFile
+        )
+        val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE).apply {
+            putExtra(MediaStore.EXTRA_OUTPUT, photoUri)
+        }
+        startActivityForResult(intent, 2002)
+    }
+
+    private fun createImageFile(): File {
+        val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
+        val fileName = "IMG_$timestamp.jpg"
+        val storageDir = requireContext().cacheDir
+        return File(storageDir, fileName)
+    }
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == 2001 && resultCode == Activity.RESULT_OK) {
-            selectedImageUri = data?.data
-            binding.ivSelectedImage.setImageURI(selectedImageUri)
+        if (resultCode == Activity.RESULT_OK) {
+            when (requestCode) {
+                2001 -> {
+                    selectedImageUri = data?.data
+                    binding.ivSelectedImage.setImageURI(selectedImageUri)
+                }
+                2002 -> {
+                    selectedImageUri = photoUri
+                    binding.ivSelectedImage.setImageURI(photoUri)
+                }
+            }
         }
     }
 
@@ -90,11 +138,11 @@ class AddReviewFragment : Fragment() {
                     val downloadUrl = uri.toString()
                     saveReviewToFirestore(userId, restaurantName, comment, rating, downloadUrl)
                 }.addOnFailureListener {
-                    Toast.makeText(requireContext(), "שגיאה בקבלת הקישור מהשרת", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(requireContext(), "שגיאה בקבלת קישור התמונה", Toast.LENGTH_SHORT).show()
                 }
             }
             .addOnFailureListener {
-                Toast.makeText(requireContext(), "שגיאה בהעלאת התמונה", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), "שגיאה בהעלאת תמונה", Toast.LENGTH_SHORT).show()
             }
     }
 

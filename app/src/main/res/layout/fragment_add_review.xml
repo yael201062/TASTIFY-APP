@@ -74,12 +74,15 @@
 
     <ImageView
         android:id="@+id/ivSelectedImage"
-        android:layout_width="93dp"
-        android:layout_height="0dp"
+        android:layout_width="0dp"
+        android:layout_height="200dp"
         android:layout_marginTop="12dp"
-        android:scaleType="centerCrop"
+        android:scaleType="fitCenter"
+        android:adjustViewBounds="true"
+        android:contentDescription="תמונה נבחרת"
+        app:layout_constraintTop_toBottomOf="@id/btnSelectImage"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/btnSelectImage" />
+        app:layout_constraintEnd_toEndOf="parent" />
 
     <Button
         android:id="@+id/btnSubmitReview"
