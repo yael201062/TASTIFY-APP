@@ -46,6 +46,13 @@ class AddReviewFragment : Fragment() {
     ): View {
         _binding = FragmentAddReviewBinding.inflate(inflater, container, false)
 
+        // הפעלת גלילה פנימית בתוך EditText של הביקורת
+        binding.etReviewContent.setOnTouchListener { v, event ->
+            v.parent.requestDisallowInterceptTouchEvent(true)
+            false
+        }
+
+        // שאר הלחצנים
         binding.btnSelectImage.setOnClickListener {
             showImagePickerDialog()
         }
@@ -83,6 +90,7 @@ class AddReviewFragment : Fragment() {
 
         return binding.root
     }
+
 
     private fun showImagePickerDialog() {
         val options = arrayOf("בחר מהגלריה", "צלם תמונה")
