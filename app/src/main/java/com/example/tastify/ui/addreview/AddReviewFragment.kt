@@ -15,6 +15,7 @@ import com.example.tastify.databinding.FragmentAddReviewBinding
 import com.example.tastify.viewmodel.ReviewViewModel
 import com.example.tastify.viewmodel.ReviewViewModelFactory
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.storage.FirebaseStorage
 
 class AddReviewFragment : Fragment() {
 
@@ -54,17 +55,7 @@ class AddReviewFragment : Fragment() {
                 return@setOnClickListener
             }
 
-            val review = Review(
-                restaurantId = restaurantName,
-                userId = currentUser.uid,
-                comment = comment,
-                rating = rating,
-                imagePath = selectedImageUri?.toString() // שומר את הקישור
-            )
-
-            reviewViewModel.addReview(review)
-            Toast.makeText(requireContext(), "הביקורת נוספה בהצלחה", Toast.LENGTH_SHORT).show()
-            findNavController().navigateUp()
+            uploadImageAndAddReview(restaurantName, comment, rating, currentUser.uid)
         }
 
         return binding.root
@@ -82,6 +73,43 @@ class AddReviewFragment : Fragment() {
             selectedImageUri = data?.data
             binding.ivSelectedImage.setImageURI(selectedImageUri)
         }
+    }
+
+    private fun uploadImageAndAddReview(restaurantName: String, comment: String, rating: Float, userId: String) {
+        if (selectedImageUri == null) {
+            saveReviewToFirestore(userId, restaurantName, comment, rating, null)
+            return
+        }
+
+        val fileName = "review_images/${userId}_${System.currentTimeMillis()}.jpg"
+        val storageRef = FirebaseStorage.getInstance().reference.child(fileName)
+
+        storageRef.putFile(selectedImageUri!!)
+            .addOnSuccessListener {
+                storageRef.downloadUrl.addOnSuccessListener { uri ->
+                    val downloadUrl = uri.toString()
+                    saveReviewToFirestore(userId, restaurantName, comment, rating, downloadUrl)
+                }.addOnFailureListener {
+                    Toast.makeText(requireContext(), "שגיאה בקבלת הקישור מהשרת", Toast.LENGTH_SHORT).show()
+                }
+            }
+            .addOnFailureListener {
+                Toast.makeText(requireContext(), "שגיאה בהעלאת התמונה", Toast.LENGTH_SHORT).show()
+            }
+    }
+
+    private fun saveReviewToFirestore(userId: String, restaurantName: String, comment: String, rating: Float, imageUrl: String?) {
+        val review = Review(
+            restaurantId = restaurantName,
+            userId = userId,
+            comment = comment,
+            rating = rating,
+            imagePath = imageUrl
+        )
+
+        reviewViewModel.addReview(review)
+        Toast.makeText(requireContext(), "הביקורת נוספה בהצלחה", Toast.LENGTH_SHORT).show()
+        findNavController().navigateUp()
     }
 
     override fun onDestroyView() {

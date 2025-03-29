@@ -14,10 +14,6 @@ import com.example.tastify.ui.profile.MyPostsFragmentDirections
 import com.google.firebase.firestore.FirebaseFirestore
 import com.squareup.picasso.Picasso
 import jp.wasabeef.picasso.transformations.CropCircleTransformation
-import okhttp3.*
-import org.json.JSONObject
-import java.io.File
-import java.io.IOException
 
 class ReviewsAdapter(
     private var reviews: MutableList<Review>,
@@ -45,6 +41,7 @@ class ReviewsAdapter(
         val userId = review.userId
         val db = FirebaseFirestore.getInstance()
 
+        // טען שם ותמונת פרופיל של המשתמש
         if (userId.isNotBlank()) {
             db.collection("users").document(userId).get()
                 .addOnSuccessListener { document ->
@@ -73,7 +70,7 @@ class ReviewsAdapter(
             holder.imgUserProfile.setImageResource(R.drawable.ic_profile_placeholder)
         }
 
-        // ניווט לעריכת פוסט
+        // עריכה אם ניתן
         if (isEditable) {
             holder.itemView.setOnClickListener {
                 val action = MyPostsFragmentDirections
@@ -86,42 +83,17 @@ class ReviewsAdapter(
         holder.ratingBar.rating = review.rating
         holder.txtComment.text = review.comment
 
-        if (!review.imagePath.isNullOrEmpty()) {
-            val file = File(review.imagePath)
-            if (file.exists()) {
-                holder.imgReview.visibility = View.VISIBLE
-                Picasso.get().load(file).into(holder.imgReview)
-            }
+        // טעינת תמונת ביקורת אם קיימת
+        val imageUrl = review.imagePath
+        if (!imageUrl.isNullOrEmpty() && imageUrl.startsWith("https://")) {
+            holder.imgReview.visibility = View.VISIBLE
+            Picasso.get()
+                .load(imageUrl)
+                .placeholder(R.drawable.ic_profile_placeholder)
+                .error(R.drawable.ic_profile_placeholder)
+                .into(holder.imgReview)
         } else {
-            // בקשת תמונת אוכל רנדומלית
-            val client = OkHttpClient()
-            val request = Request.Builder()
-                .url("https://api.unsplash.com/photos/random?query=food&client_id=0c3PEFtuji3Yu2TyMg9M4XKB-dh1KWKFrK2ldqy--mk")
-                .build()
-
-            client.newCall(request).enqueue(object : Callback {
-                override fun onFailure(call: Call, e: IOException) {
-                    e.printStackTrace()
-                }
-
-                override fun onResponse(call: Call, response: Response) {
-                    response.use {
-                        val bodyString = it.body?.string() ?: return
-                        try {
-                            val imageUrl = JSONObject(bodyString)
-                                .getJSONObject("urls")
-                                .getString("regular")
-
-                            holder.imgReview.post {
-                                Picasso.get().load(imageUrl).into(holder.imgReview)
-                                holder.imgReview.visibility = View.VISIBLE
-                            }
-                        } catch (e: Exception) {
-                            e.printStackTrace()
-                        }
-                    }
-                }
-            })
+            holder.imgReview.visibility = View.GONE
         }
     }
 
