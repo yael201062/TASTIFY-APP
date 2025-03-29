@@ -13,6 +13,9 @@ class ReviewViewModel(private val repository: ReviewRepository) : ViewModel() {
     private val _allReviews = MutableStateFlow<List<Review>>(emptyList())
     val allReviews: StateFlow<List<Review>> get() = _allReviews
 
+    private val _searchResults = MutableStateFlow<List<Review>?>(null)
+    val searchResults: StateFlow<List<Review>?> get() = _searchResults
+
     private val _userReviews = MutableStateFlow<List<Review>>(emptyList())
     val userReviews: StateFlow<List<Review>> get() = _userReviews
 
@@ -20,6 +23,7 @@ class ReviewViewModel(private val repository: ReviewRepository) : ViewModel() {
         viewModelScope.launch {
             repository.getAllReviews().collect { result ->
                 _allReviews.value = result
+                _searchResults.value = null // איפוס תוצאות חיפוש
             }
         }
     }
@@ -27,7 +31,7 @@ class ReviewViewModel(private val repository: ReviewRepository) : ViewModel() {
     fun getReviewsByRestaurant(restaurantId: String) {
         viewModelScope.launch {
             repository.getReviewsByRestaurant(restaurantId).collect { filtered ->
-                _allReviews.value = filtered
+                _searchResults.value = filtered
             }
         }
     }
@@ -63,5 +67,8 @@ class ReviewViewModel(private val repository: ReviewRepository) : ViewModel() {
         viewModelScope.launch {
             repository.deleteReview(review)
         }
+    }
+    fun clearSearch() {
+        _searchResults.value = null
     }
 }

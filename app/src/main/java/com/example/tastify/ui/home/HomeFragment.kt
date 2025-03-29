@@ -44,9 +44,12 @@ class HomeFragment : Fragment() {
             if (searchQuery.isNotEmpty()) {
                 reviewViewModel.getReviewsByRestaurant(searchQuery)
             } else {
+                reviewViewModel.clearSearch()
                 reviewViewModel.loadAllReviews()
             }
         }
+
+
 
         // כפתור הוספת ביקורת
         binding.fabAddReview.setOnClickListener {
@@ -64,11 +67,23 @@ class HomeFragment : Fragment() {
 
     private fun observeAllReviews() {
         lifecycleScope.launch {
-            reviewViewModel.allReviews.collect { reviewsList ->
-                adapter.updateData(reviewsList)
+            reviewViewModel.allReviews.collect { all ->
+                val search = reviewViewModel.searchResults.value
+                if (search == null) {
+                    adapter.updateData(all)
+                }
+            }
+        }
+
+        lifecycleScope.launch {
+            reviewViewModel.searchResults.collect { searchResults ->
+                if (searchResults != null) {
+                    adapter.updateData(searchResults)
+                }
             }
         }
     }
+
 
 
     override fun onResume() {
