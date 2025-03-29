@@ -6,15 +6,15 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Observer
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.tastify.data.database.AppDatabase
 import com.example.tastify.data.dao.repository.ReviewRepository
 import com.example.tastify.databinding.FragmentMyPostsBinding
 import com.example.tastify.ui.adapters.ReviewsAdapter
 import com.example.tastify.viewmodel.ReviewViewModel
 import com.example.tastify.viewmodel.ReviewViewModelFactory
 import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.launch
 
 class MyPostsFragment : Fragment() {
 
@@ -22,7 +22,7 @@ class MyPostsFragment : Fragment() {
     private val binding get() = _binding!!
 
     private val reviewViewModel: ReviewViewModel by viewModels {
-        ReviewViewModelFactory(ReviewRepository(AppDatabase.getDatabase(requireContext()).reviewDao()))
+        ReviewViewModelFactory(ReviewRepository())
     }
 
     private lateinit var adapter: ReviewsAdapter
@@ -46,24 +46,25 @@ class MyPostsFragment : Fragment() {
         if (currentUser != null) {
             val userId = currentUser.uid
 
-            // טוען פעם ראשונה
-            loadUserReviews(userId)
+            // טוען את הביקורות של המשתמש
+            reviewViewModel.getReviewsByUser(userId)
 
-            // מאפשר רענון ידני
+            // מאזין לשינויים ב־StateFlow
+            lifecycleScope.launch {
+                reviewViewModel.userReviews.collect { reviews ->
+                    adapter.updateData(reviews.toMutableList())
+                    binding.swipeRefreshLayout.isRefreshing = false
+                }
+            }
+
+
             binding.swipeRefreshLayout.setOnRefreshListener {
-                loadUserReviews(userId)
+                binding.swipeRefreshLayout.isRefreshing = true
+                reviewViewModel.getReviewsByUser(userId)
             }
         } else {
             binding.tvMyPostsTitle.text = "אין משתמש מחובר"
         }
-    }
-
-    private fun loadUserReviews(userId: String) {
-        binding.swipeRefreshLayout.isRefreshing = true
-        reviewViewModel.getReviewsByUser(userId).observe(viewLifecycleOwner, Observer { reviews ->
-            adapter.updateData(reviews.toMutableList())
-            binding.swipeRefreshLayout.isRefreshing = false
-        })
     }
 
     override fun onDestroyView() {

@@ -9,13 +9,11 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
-import com.example.tastify.data.database.AppDatabase
-import com.example.tastify.data.model.Review
 import com.example.tastify.data.dao.repository.ReviewRepository
+import com.example.tastify.data.model.Review
 import com.example.tastify.databinding.FragmentEditReviewBinding
 import com.example.tastify.viewmodel.ReviewViewModel
 import com.example.tastify.viewmodel.ReviewViewModelFactory
-import java.util.*
 
 class EditReviewFragment : Fragment() {
 
@@ -23,12 +21,11 @@ class EditReviewFragment : Fragment() {
     private val binding get() = _binding!!
 
     private val args: EditReviewFragmentArgs by navArgs()
+    private var currentReview: Review? = null
 
     private val reviewViewModel: ReviewViewModel by viewModels {
-        ReviewViewModelFactory(ReviewRepository(AppDatabase.getDatabase(requireContext()).reviewDao()))
+        ReviewViewModelFactory(ReviewRepository())
     }
-
-    private var currentReview: Review? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -43,12 +40,16 @@ class EditReviewFragment : Fragment() {
 
         val reviewId = args.reviewId
 
-        reviewViewModel.getReviewById(reviewId).observe(viewLifecycleOwner) { review ->
-            review?.let {
-                currentReview = it
-                binding.etRestaurantName.setText(it.restaurantId)
-                binding.etReviewContent.setText(it.comment)
-                binding.ratingBar.rating = it.rating
+        // ✅ שימוש ב-ViewModel לקריאה אסינכרונית
+        reviewViewModel.getReviewById(reviewId) { review ->
+            if (review != null) {
+                currentReview = review
+                binding.etRestaurantName.setText(review.restaurantId)
+                binding.etReviewContent.setText(review.comment)
+                binding.ratingBar.rating = review.rating
+            } else {
+                Toast.makeText(requireContext(), "לא נמצאה ביקורת", Toast.LENGTH_SHORT).show()
+                findNavController().navigateUp()
             }
         }
 

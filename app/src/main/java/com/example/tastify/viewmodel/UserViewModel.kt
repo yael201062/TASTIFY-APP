@@ -1,56 +1,43 @@
 package com.example.tastify.viewmodel
 
 import androidx.lifecycle.*
-import com.example.tastify.data.model.User
 import com.example.tastify.data.dao.repository.UserRepository
+import com.example.tastify.data.model.User
+import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.tasks.await
 
 class UserViewModel(private val repository: UserRepository) : ViewModel() {
 
     private val _currentUser = MutableLiveData<User?>()
     val currentUser: LiveData<User?> get() = _currentUser
 
-    fun getUserName(userId: String): LiveData<String?> {
-        return repository.getUserNameById(userId)
+    fun loadUser(userId: String) {
+        repository.getUserById(userId).observeForever { user ->
+            _currentUser.postValue(user)
+        }
     }
+
     fun getUserById(userId: String): LiveData<User?> {
         return repository.getUserById(userId)
     }
 
-    fun loadUser(userId: String) {
-        repository.getUserById(userId).observeForever { user ->
-            if (user == null) {
-                val firebaseUser = FirebaseAuth.getInstance().currentUser
-                if (firebaseUser != null) {
-                    val newUser = User(
-                        id = firebaseUser.uid,
-                        name = firebaseUser.displayName ?: "משתמש חדש",
-                        email = firebaseUser.email ?: "",
-                        profileImageUrl = firebaseUser.photoUrl?.toString() ?: ""
-                    )
-                    viewModelScope.launch {
-                        repository.insertUser(newUser)
-                        _currentUser.postValue(newUser) // שמירה וטעינה מיידית
-                    }
-                }
-            } else {
-                _currentUser.postValue(user)
-            }
-        }
-    }
-
-
-    fun updateUser(user: User) {
-        viewModelScope.launch {
-            repository.updateUser(user)
-            _currentUser.postValue(user)
-        }
+    fun getUserName(userId: String): LiveData<String?> {
+        return repository.getUserNameById(userId)
     }
 
     fun insertUser(user: User) {
         viewModelScope.launch {
             repository.insertUser(user)
+            _currentUser.postValue(user)
+        }
+    }
+
+    fun updateUser(user: User) {
+        viewModelScope.launch {
+            repository.updateUser(user)
+            _currentUser.postValue(user)
         }
     }
 

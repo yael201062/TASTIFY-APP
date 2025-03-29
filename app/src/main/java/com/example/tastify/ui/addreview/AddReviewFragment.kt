@@ -9,16 +9,12 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
-import com.example.tastify.data.database.AppDatabase
 import com.example.tastify.data.model.Review
 import com.example.tastify.data.dao.repository.ReviewRepository
 import com.example.tastify.databinding.FragmentAddReviewBinding
 import com.example.tastify.viewmodel.ReviewViewModel
 import com.example.tastify.viewmodel.ReviewViewModelFactory
 import com.google.firebase.auth.FirebaseAuth
-import com.squareup.picasso.Picasso
-import java.io.File
-import java.io.FileOutputStream
 
 class AddReviewFragment : Fragment() {
 
@@ -26,7 +22,7 @@ class AddReviewFragment : Fragment() {
     private val binding get() = _binding!!
 
     private val reviewViewModel: ReviewViewModel by viewModels {
-        ReviewViewModelFactory(ReviewRepository(AppDatabase.getDatabase(requireContext()).reviewDao()))
+        ReviewViewModelFactory(ReviewRepository())
     }
 
     private var selectedImageUri: Uri? = null
@@ -63,7 +59,7 @@ class AddReviewFragment : Fragment() {
                 userId = currentUser.uid,
                 comment = comment,
                 rating = rating,
-                imagePath = selectedImageUri?.let { copyImageToCache(it) }
+                imagePath = selectedImageUri?.toString() // שומר את הקישור
             )
 
             reviewViewModel.addReview(review)
@@ -88,24 +84,8 @@ class AddReviewFragment : Fragment() {
         }
     }
 
-    private fun copyImageToCache(uri: Uri): String? {
-        return try {
-            val inputStream = requireContext().contentResolver.openInputStream(uri)
-            val file = File(requireContext().cacheDir, "review_${System.currentTimeMillis()}.jpg")
-            val outputStream = FileOutputStream(file)
-            inputStream?.copyTo(outputStream)
-            inputStream?.close()
-            outputStream.close()
-            file.absolutePath // ✅ return the saved image path
-        } catch (e: Exception) {
-            e.printStackTrace()
-            null
-        }
-    }
-
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
     }
-
 }

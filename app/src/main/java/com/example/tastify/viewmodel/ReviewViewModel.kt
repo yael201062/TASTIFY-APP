@@ -1,49 +1,56 @@
 package com.example.tastify.viewmodel
 
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.tastify.data.model.Review
 import com.example.tastify.data.dao.repository.ReviewRepository
-import kotlinx.coroutines.flow.Flow
+import com.example.tastify.data.model.Review
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 class ReviewViewModel(private val repository: ReviewRepository) : ViewModel() {
 
-    private val _reviews = MutableStateFlow<List<Review>>(emptyList())
-    val reviews: StateFlow<List<Review>> get() = _reviews
+    private val _allReviews = MutableStateFlow<List<Review>>(emptyList())
+    val allReviews: StateFlow<List<Review>> get() = _allReviews
 
-    init {
-        loadAllReviews()
-    }
+    private val _userReviews = MutableStateFlow<List<Review>>(emptyList())
+    val userReviews: StateFlow<List<Review>> get() = _userReviews
 
     fun loadAllReviews() {
         viewModelScope.launch {
-            repository.getAllReviews().collect { reviewList ->
-                _reviews.value = reviewList
+            repository.getAllReviews().collect { result ->
+                _allReviews.value = result
             }
+        }
+    }
+
+    fun getReviewsByRestaurant(restaurantId: String) {
+        viewModelScope.launch {
+            repository.getReviewsByRestaurant(restaurantId).collect { filtered ->
+                _allReviews.value = filtered
+            }
+        }
+    }
+
+    fun getReviewsByUser(userId: String) {
+        viewModelScope.launch {
+            repository.getReviewsByUser(userId).collect { reviews ->
+                _userReviews.value = reviews
+            }
+        }
+    }
+
+    fun getReviewById(reviewId: String, onResult: (Review?) -> Unit) {
+        viewModelScope.launch {
+            val review = repository.getReviewById(reviewId)
+            onResult(review)
         }
     }
 
     fun addReview(review: Review) {
         viewModelScope.launch {
             repository.insertReview(review)
-            loadAllReviews() // טוען מחדש את כל הביקורות כדי לעדכן את הרשימה במסך הבית
         }
-    }
-
-    fun getReviewsByUser(userId: String): LiveData<List<Review>> {
-        return repository.getReviewsByUser(userId)
-    }
-
-    fun getReviewById(reviewId: String): LiveData<Review?> {
-        return repository.getReviewById(reviewId)
-    }
-
-    fun getReviewsByRestaurant(restaurantId: String): Flow<List<Review>> {
-        return repository.getReviewsByRestaurant(restaurantId)
     }
 
     fun updateReview(review: Review) {
@@ -57,5 +64,4 @@ class ReviewViewModel(private val repository: ReviewRepository) : ViewModel() {
             repository.deleteReview(review)
         }
     }
-
 }

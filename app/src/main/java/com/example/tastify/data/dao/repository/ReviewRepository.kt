@@ -1,44 +1,66 @@
 package com.example.tastify.data.dao.repository
 
-import androidx.lifecycle.LiveData
-import com.example.tastify.data.dao.ReviewDao
 import com.example.tastify.data.model.Review
-import kotlinx.coroutines.Dispatchers
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
+import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.tasks.await
 
-class ReviewRepository(private val reviewDao: ReviewDao) {
+class ReviewRepository {
 
-    fun getAllReviews(): Flow<List<Review>> {
-        return reviewDao.getAllReviews()
+    private val db = FirebaseFirestore.getInstance()
+    private val reviewsCollection = db.collection("reviews")
+
+    fun getAllReviews(): Flow<List<Review>> = callbackFlow {
+        val listener = reviewsCollection
+            .orderBy("timestamp", Query.Direction.DESCENDING)
+            .addSnapshotListener { snapshot, _ ->
+                val reviews = snapshot?.toObjects(Review::class.java) ?: emptyList()
+                trySend(reviews).isSuccess
+            }
+        awaitClose { listener.remove() }
     }
 
-    fun getReviewsByRestaurant(restaurantId: String): Flow<List<Review>> {
-        return reviewDao.getReviewsByRestaurant(restaurantId)
+    fun getReviewsByRestaurant(restaurantId: String): Flow<List<Review>> = callbackFlow {
+        val listener = reviewsCollection
+            .whereEqualTo("restaurantId", restaurantId)
+            .orderBy("timestamp", Query.Direction.DESCENDING)
+            .addSnapshotListener { snapshot, _ ->
+                val filtered = snapshot?.toObjects(Review::class.java) ?: emptyList()
+                trySend(filtered).isSuccess
+            }
+        awaitClose { listener.remove() }
     }
 
-
-        fun getReviewsByUser(userId: String): LiveData<List<Review>> {
-            return reviewDao.getReviewsByUserId(userId)
-        }
-
-    fun getReviewById(reviewId: String): LiveData<Review?> {
-        return reviewDao.getReviewById(reviewId)
+    fun getReviewsByUser(userId: String): Flow<List<Review>> = callbackFlow {
+        val listener = reviewsCollection
+            .whereEqualTo("userId", userId)
+            .orderBy("timestamp", Query.Direction.DESCENDING)
+            .addSnapshotListener { snapshot, _ ->
+                val userReviews = snapshot?.toObjects(Review::class.java) ?: emptyList()
+                trySend(userReviews).isSuccess
+            }
+        awaitClose { listener.remove() }
     }
 
-    suspend fun updateReview(review: Review) {
-        withContext(Dispatchers.IO) {
-            reviewDao.updateReview(review)
-        }
+    suspend fun getReviewById(reviewId: String): Review? {
+        val snapshot = reviewsCollection.document(reviewId).get().await()
+        return snapshot.toObject(Review::class.java)
     }
 
     suspend fun insertReview(review: Review) {
-        reviewDao.insertReview(review)
+        val docRef = reviewsCollection.document()
+        val reviewWithId = review.copy(id = docRef.id)
+        docRef.set(reviewWithId).await()
+    }
+
+    suspend fun updateReview(review: Review) {
+        reviewsCollection.document(review.id).set(review).await()
     }
 
     suspend fun deleteReview(review: Review) {
-        withContext(Dispatchers.IO) {
-            reviewDao.deleteReview(review)
-        }
+        reviewsCollection.document(review.id).delete().await()
     }
 }

@@ -19,8 +19,10 @@ import com.example.tastify.data.model.User
 import com.example.tastify.databinding.FragmentEditProfileBinding
 import com.example.tastify.viewmodel.UserViewModel
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.storage.FirebaseStorage
 import com.squareup.picasso.Picasso
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
@@ -131,15 +133,37 @@ class EditProfileFragment : Fragment() {
             return
         }
 
-        val imageUri = selectedImageUri ?: photoUri
-        val profileImageUrl = imageUri?.toString() ?: currentUser?.profileImageUrl ?: ""
-
-        val updatedUser = User(id = userId, name = name, email = email, profileImageUrl = profileImageUrl)
+        val localUri = selectedImageUri ?: photoUri
 
         lifecycleScope.launch {
+            val imageUrl = if (localUri != null) {
+                uploadImageToFirebase(localUri, userId)
+            } else {
+                currentUser?.profileImageUrl
+            }
+
+            val updatedUser = User(
+                id = userId,
+                name = name,
+                email = email,
+                profileImageUrl = imageUrl
+            )
+
             userViewModel.updateUser(updatedUser)
             Toast.makeText(requireContext(), "הפרופיל עודכן בהצלחה", Toast.LENGTH_SHORT).show()
             findNavController().popBackStack()
+        }
+    }
+
+    private suspend fun uploadImageToFirebase(uri: Uri, userId: String): String? {
+        return try {
+            val storageRef = FirebaseStorage.getInstance().reference
+                .child("profile_images/${userId}_${System.currentTimeMillis()}.jpg")
+            storageRef.putFile(uri).await()
+            storageRef.downloadUrl.await().toString()
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
         }
     }
 

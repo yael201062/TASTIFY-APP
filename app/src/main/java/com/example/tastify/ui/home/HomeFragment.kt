@@ -7,14 +7,13 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.tastify.R
-import com.example.tastify.data.database.AppDatabase
 import com.example.tastify.data.dao.repository.ReviewRepository
 import com.example.tastify.databinding.FragmentHomeBinding
 import com.example.tastify.ui.adapters.ReviewsAdapter
 import com.example.tastify.viewmodel.ReviewViewModel
 import com.example.tastify.viewmodel.ReviewViewModelFactory
 import kotlinx.coroutines.launch
+
 
 class HomeFragment : Fragment() {
 
@@ -24,7 +23,7 @@ class HomeFragment : Fragment() {
     private lateinit var adapter: ReviewsAdapter
 
     private val reviewViewModel: ReviewViewModel by viewModels {
-        ReviewViewModelFactory(ReviewRepository(AppDatabase.getDatabase(requireContext()).reviewDao()))
+        ReviewViewModelFactory(ReviewRepository()) // ✅ שימוש ב-Firestore ולא Room
     }
 
     override fun onCreateView(
@@ -39,19 +38,19 @@ class HomeFragment : Fragment() {
 
         observeAllReviews()
 
-        // כפתור חיפוש
+        // כפתור חיפוש לפי restaurantId
         binding.btnSearch.setOnClickListener {
             val searchQuery = binding.etSearch.text.toString().trim()
             if (searchQuery.isNotEmpty()) {
-                observeReviewsByRestaurantId(searchQuery)
+                reviewViewModel.getReviewsByRestaurant(searchQuery)
             } else {
-                observeAllReviews()
+                reviewViewModel.loadAllReviews()
             }
         }
 
-        // הוספת ביקורת
+        // כפתור הוספת ביקורת
         binding.fabAddReview.setOnClickListener {
-            findNavController().navigate(R.id.addReviewFragment)
+            findNavController().navigate(com.example.tastify.R.id.addReviewFragment)
         }
 
         // רענון ע"י משיכה
@@ -65,19 +64,12 @@ class HomeFragment : Fragment() {
 
     private fun observeAllReviews() {
         lifecycleScope.launch {
-            reviewViewModel.reviews.collect { reviewsList ->
+            reviewViewModel.allReviews.collect { reviewsList ->
                 adapter.updateData(reviewsList)
             }
         }
     }
 
-    private fun observeReviewsByRestaurantId(restaurantId: String) {
-        lifecycleScope.launch {
-            reviewViewModel.getReviewsByRestaurant(restaurantId).collect { filtered ->
-                adapter.updateData(filtered)
-            }
-        }
-    }
 
     override fun onResume() {
         super.onResume()

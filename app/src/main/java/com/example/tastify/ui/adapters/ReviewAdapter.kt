@@ -6,16 +6,12 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.RatingBar
 import android.widget.TextView
-import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.findNavController
 import androidx.recyclerview.widget.RecyclerView
-import com.example.tastify.ui.profile.MyPostsFragmentDirections
 import com.example.tastify.R
-import com.example.tastify.data.database.AppDatabase
-import com.example.tastify.data.dao.repository.UserRepository
 import com.example.tastify.data.model.Review
-import com.example.tastify.viewmodel.UserViewModel
+import com.example.tastify.ui.profile.MyPostsFragmentDirections
+import com.google.firebase.firestore.FirebaseFirestore
 import com.squareup.picasso.Picasso
 import jp.wasabeef.picasso.transformations.CropCircleTransformation
 import okhttp3.*
@@ -45,40 +41,43 @@ class ReviewsAdapter(
 
     override fun onBindViewHolder(holder: ReviewViewHolder, position: Int) {
         val review = reviews[position]
-        val context = holder.itemView.context
 
-        // יצירת UserViewModel
-        val userDao = AppDatabase.getDatabase(context).userDao()
-        val repository = UserRepository(userDao)
-        val factory = UserViewModel.Factory(repository)
-        val userViewModel = ViewModelProvider(
-            context as androidx.lifecycle.ViewModelStoreOwner,
-            factory
-        )[UserViewModel::class.java]
+        val userId = review.userId
+        val db = FirebaseFirestore.getInstance()
 
-        // טען את שם המשתמש + תמונת פרופיל
-        userViewModel.getUserById(review.userId)
-            .observe(context as LifecycleOwner) { user ->
-                holder.txtUserName.text = user?.name ?: "משתמש לא ידוע"
+        if (userId.isNotBlank()) {
+            db.collection("users").document(userId).get()
+                .addOnSuccessListener { document ->
+                    val name = document.getString("name") ?: "משתמש לא ידוע"
+                    val profileImageUrl = document.getString("profileImageUrl")
 
-                val profileUrl = user?.profileImageUrl
-                if (!profileUrl.isNullOrEmpty()) {
-                    Picasso.get()
-                        .load(profileUrl)
-                        .placeholder(R.drawable.ic_profile_placeholder)
-                        .error(R.drawable.ic_profile_placeholder)
-                        .transform(CropCircleTransformation())
-                        .into(holder.imgUserProfile)
-                } else {
+                    holder.txtUserName.text = name
+
+                    if (!profileImageUrl.isNullOrEmpty()) {
+                        Picasso.get()
+                            .load(profileImageUrl)
+                            .placeholder(R.drawable.ic_profile_placeholder)
+                            .error(R.drawable.ic_profile_placeholder)
+                            .transform(CropCircleTransformation())
+                            .into(holder.imgUserProfile)
+                    } else {
+                        holder.imgUserProfile.setImageResource(R.drawable.ic_profile_placeholder)
+                    }
+                }
+                .addOnFailureListener {
+                    holder.txtUserName.text = "שגיאה בטעינת משתמש"
                     holder.imgUserProfile.setImageResource(R.drawable.ic_profile_placeholder)
                 }
-            }
+        } else {
+            holder.txtUserName.text = "משתמש לא ידוע"
+            holder.imgUserProfile.setImageResource(R.drawable.ic_profile_placeholder)
+        }
 
-        // אם ניתן לערוך
+        // ניווט לעריכת פוסט
         if (isEditable) {
             holder.itemView.setOnClickListener {
                 val action = MyPostsFragmentDirections
-                    .actionMyPostsFragmentToEditReviewFragment(review.id.toString())
+                    .actionMyPostsFragmentToEditReviewFragment(review.id)
                 it.findNavController().navigate(action)
             }
         }
@@ -87,7 +86,6 @@ class ReviewsAdapter(
         holder.ratingBar.rating = review.rating
         holder.txtComment.text = review.comment
 
-        // טען תמונה של הביקורת אם קיימת
         if (!review.imagePath.isNullOrEmpty()) {
             val file = File(review.imagePath)
             if (file.exists()) {
@@ -95,7 +93,7 @@ class ReviewsAdapter(
                 Picasso.get().load(file).into(holder.imgReview)
             }
         } else {
-            // טען תמונת אוכל רנדומלית מ-Unsplash אם אין תמונה
+            // בקשת תמונת אוכל רנדומלית
             val client = OkHttpClient()
             val request = Request.Builder()
                 .url("https://api.unsplash.com/photos/random?query=food&client_id=0c3PEFtuji3Yu2TyMg9M4XKB-dh1KWKFrK2ldqy--mk")
@@ -108,13 +106,18 @@ class ReviewsAdapter(
 
                 override fun onResponse(call: Call, response: Response) {
                     response.use {
-                        val imageUrl = JSONObject(it.body?.string() ?: return)
-                            .getJSONObject("urls")
-                            .getString("regular")
+                        val bodyString = it.body?.string() ?: return
+                        try {
+                            val imageUrl = JSONObject(bodyString)
+                                .getJSONObject("urls")
+                                .getString("regular")
 
-                        holder.imgReview.post {
-                            Picasso.get().load(imageUrl).into(holder.imgReview)
-                            holder.imgReview.visibility = View.VISIBLE
+                            holder.imgReview.post {
+                                Picasso.get().load(imageUrl).into(holder.imgReview)
+                                holder.imgReview.visibility = View.VISIBLE
+                            }
+                        } catch (e: Exception) {
+                            e.printStackTrace()
                         }
                     }
                 }
