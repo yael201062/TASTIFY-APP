@@ -58,13 +58,27 @@
             style="?android:attr/ratingBarStyleSmall"
             android:layout_marginBottom="8dp"/>
 
-        <ImageView
-            android:id="@+id/ivPostImage"
+        <!-- ✅ תמונה + טעינה -->
+        <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="200dp"
-            android:scaleType="centerCrop"
-            android:layout_marginTop="8dp"
-            android:visibility="gone"/>
+            android:layout_marginTop="8dp">
+
+            <ImageView
+                android:id="@+id/ivPostImage"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="centerCrop"
+                android:visibility="gone"/>
+
+            <ProgressBar
+                android:id="@+id/progressBar"
+                style="?android:attr/progressBarStyleLarge"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_gravity="center"
+                android:visibility="gone"/>
+        </FrameLayout>
 
         <TextView
             android:id="@+id/tvPostContent"

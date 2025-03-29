@@ -85,6 +85,7 @@ dependencies {
     implementation("androidx.fragment:fragment-ktx:1.6.2")
     implementation("androidx.room:room-runtime:$roomversion")
     implementation("com.squareup.okhttp3:okhttp:4.10.0")
+    implementation ("jp.wasabeef:picasso-transformations:2.4.0")
     // If this project uses any Kotlin source, use Kotlin Symbol Processing (KSP)
         // See Add the KSP plugin to your project
     ksp("androidx.room:room-compiler:$roomversion")
