@@ -14,6 +14,7 @@ import com.example.tastify.ui.adapters.ReviewsAdapter
 import com.example.tastify.viewmodel.ReviewViewModel
 import com.example.tastify.viewmodel.ReviewViewModelFactory
 import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 class MyPostsFragment : Fragment() {
@@ -21,11 +22,11 @@ class MyPostsFragment : Fragment() {
     private var _binding: FragmentMyPostsBinding? = null
     private val binding get() = _binding!!
 
+    private lateinit var adapter: ReviewsAdapter
+
     private val reviewViewModel: ReviewViewModel by viewModels {
         ReviewViewModelFactory(ReviewRepository())
     }
-
-    private lateinit var adapter: ReviewsAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -46,17 +47,15 @@ class MyPostsFragment : Fragment() {
         if (currentUser != null) {
             val userId = currentUser.uid
 
-            // טוען את הביקורות של המשתמש
+            // טען ביקורות לפי המשתמש (Firestore)
             reviewViewModel.getReviewsByUser(userId)
 
-            // מאזין לשינויים ב־StateFlow
-            lifecycleScope.launch {
+            viewLifecycleOwner.lifecycleScope.launch {
                 reviewViewModel.userReviews.collect { reviews ->
                     adapter.updateData(reviews.toMutableList())
                     binding.swipeRefreshLayout.isRefreshing = false
                 }
             }
-
 
             binding.swipeRefreshLayout.setOnRefreshListener {
                 binding.swipeRefreshLayout.isRefreshing = true

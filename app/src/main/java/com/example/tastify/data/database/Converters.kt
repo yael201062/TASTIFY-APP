@@ -2,7 +2,7 @@ package com.example.tastify.data.database
 
 import androidx.room.TypeConverter
 import com.google.firebase.Timestamp
-import java.util.*
+import java.util.Date
 
 class Converters {
 
@@ -12,7 +12,7 @@ class Converters {
     }
 
     @TypeConverter
-    fun toTimestamp(time: Long?): Timestamp? {
-        return time?.let { Timestamp(Date(it)) }
+    fun toTimestamp(millis: Long?): Timestamp? {
+        return millis?.let { Timestamp(Date(it)) }
     }
 }

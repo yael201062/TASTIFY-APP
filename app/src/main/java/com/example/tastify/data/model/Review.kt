@@ -6,11 +6,12 @@ import com.google.firebase.Timestamp
 
 @Entity(tableName = "reviews")
 data class Review(
-    @PrimaryKey val id: String = "",
-    val userId: String = "",
-    val restaurantId: String = "",
-    val rating: Float = 0.0f,
-    val comment: String = "",
-    val imagePath: String? = null,
-    val timestamp: Timestamp = Timestamp.now()
+    @PrimaryKey
+    var id: String = "",
+    var userId: String = "",
+    var restaurantId: String = "",
+    var rating: Float = 0.0f,
+    var comment: String = "",
+    var imagePath: String? = null,
+    var timestamp: Timestamp = Timestamp.now()
 )
