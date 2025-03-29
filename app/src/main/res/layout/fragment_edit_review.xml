@@ -42,6 +42,25 @@
             android:stepSize="1.0"
             android:layout_marginTop="12dp" />
 
+        <!-- כפתור לבחירת תמונה -->
+        <Button
+            android:id="@+id/btnSelectImage"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="בחר תמונה"
+            android:layout_marginTop="16dp" />
+
+        <!-- תצוגת תמונה שנבחרה -->
+        <ImageView
+            android:id="@+id/ivSelectedImage"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:layout_marginTop="8dp"
+            android:scaleType="centerCrop"
+            android:adjustViewBounds="true"
+            android:background="@android:color/darker_gray"
+            android:contentDescription="תמונה נבחרת" />
+
         <Button
             android:id="@+id/btnSaveReview"
             android:layout_width="match_parent"

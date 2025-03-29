@@ -1,10 +1,13 @@
 package com.example.tastify.ui.addreview
 
+import android.app.Activity
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.provider.MediaStore
+import android.view.*
 import android.widget.Toast
+import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
@@ -14,6 +17,13 @@ import com.example.tastify.data.model.Review
 import com.example.tastify.databinding.FragmentEditReviewBinding
 import com.example.tastify.viewmodel.ReviewViewModel
 import com.example.tastify.viewmodel.ReviewViewModelFactory
+import com.google.firebase.storage.FirebaseStorage
+import com.squareup.picasso.Picasso
+import kotlinx.coroutines.*
+import kotlinx.coroutines.tasks.await
+import java.io.File
+import java.text.SimpleDateFormat
+import java.util.*
 
 class EditReviewFragment : Fragment() {
 
@@ -22,6 +32,8 @@ class EditReviewFragment : Fragment() {
 
     private val args: EditReviewFragmentArgs by navArgs()
     private var currentReview: Review? = null
+    private var selectedImageUri: Uri? = null
+    private var photoUri: Uri? = null
 
     private val reviewViewModel: ReviewViewModel by viewModels {
         ReviewViewModelFactory(ReviewRepository())
@@ -40,17 +52,24 @@ class EditReviewFragment : Fragment() {
 
         val reviewId = args.reviewId
 
-        // ✅ שימוש ב-ViewModel לקריאה אסינכרונית
         reviewViewModel.getReviewById(reviewId) { review ->
             if (review != null) {
                 currentReview = review
                 binding.etRestaurantName.setText(review.restaurantId)
                 binding.etReviewContent.setText(review.comment)
                 binding.ratingBar.rating = review.rating
+
+                if (!review.imagePath.isNullOrEmpty()) {
+                    Picasso.get().load(review.imagePath).into(binding.ivSelectedImage)
+                }
             } else {
                 Toast.makeText(requireContext(), "לא נמצאה ביקורת", Toast.LENGTH_SHORT).show()
                 findNavController().navigateUp()
             }
+        }
+
+        binding.btnSelectImage.setOnClickListener {
+            selectImageFromGallery()
         }
 
         binding.btnSaveReview.setOnClickListener {
@@ -60,6 +79,13 @@ class EditReviewFragment : Fragment() {
         binding.btnDeleteReview.setOnClickListener {
             deleteReview()
         }
+    }
+
+    private fun selectImageFromGallery() {
+        val intent = Intent(Intent.ACTION_PICK).apply {
+            type = "image/*"
+        }
+        startActivityForResult(intent, 3001)
     }
 
     private fun saveReview() {
@@ -72,16 +98,33 @@ class EditReviewFragment : Fragment() {
             return
         }
 
-        val updatedReview = currentReview?.copy(
-            restaurantId = restaurantName,
-            comment = comment,
-            rating = rating
-        )
+        val review = currentReview ?: return
 
-        if (updatedReview != null) {
+        // 🚀 העלאת תמונה חדשה אם נבחרה
+        CoroutineScope(Dispatchers.Main).launch {
+            val newImageUrl = selectedImageUri?.let { uploadImageToFirebase(it, review.id) }
+            val updatedReview = review.copy(
+                restaurantId = restaurantName,
+                comment = comment,
+                rating = rating,
+                imagePath = newImageUrl ?: review.imagePath
+            )
+
             reviewViewModel.updateReview(updatedReview)
             Toast.makeText(requireContext(), "הביקורת עודכנה בהצלחה", Toast.LENGTH_SHORT).show()
             findNavController().navigateUp()
+        }
+    }
+
+    private suspend fun uploadImageToFirebase(uri: Uri, reviewId: String): String? {
+        return try {
+            val storageRef = FirebaseStorage.getInstance()
+                .reference.child("review_images/${reviewId}_${System.currentTimeMillis()}.jpg")
+            storageRef.putFile(uri).await()
+            storageRef.downloadUrl.await().toString()
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
         }
     }
 
@@ -90,6 +133,14 @@ class EditReviewFragment : Fragment() {
             reviewViewModel.deleteReview(review)
             Toast.makeText(requireContext(), "הביקורת נמחקה", Toast.LENGTH_SHORT).show()
             findNavController().navigateUp()
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == 3001 && resultCode == Activity.RESULT_OK) {
+            selectedImageUri = data?.data
+            binding.ivSelectedImage.setImageURI(selectedImageUri)
         }
     }
 
