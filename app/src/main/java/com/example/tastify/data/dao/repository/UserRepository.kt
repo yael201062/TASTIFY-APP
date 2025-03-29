@@ -30,29 +30,25 @@ class UserRepository(private val userDao: UserDao) {
     fun getUserById(userId: String): LiveData<User?> {
         val liveData = MutableLiveData<User?>()
 
-        // ננסה לטעון מה-ROOM
-        userDao.getUserById(userId).observeForever { cachedUser ->
-            if (cachedUser != null) {
-                liveData.postValue(cachedUser)
-            } else {
-                // אם לא קיים ב-ROOM, נטען מ-Firestore
-                usersCollection.document(userId).get()
-                    .addOnSuccessListener { snapshot ->
-                        val user = snapshot.toObject(User::class.java)
-                        liveData.postValue(user)
+        // מושך קודם מה-Firestore, אח"כ שומר ב-Room
+        usersCollection.document(userId).get()
+            .addOnSuccessListener { snapshot ->
+                val user = snapshot.toObject(User::class.java)
+                liveData.postValue(user)
 
-                        // שמירה ל-ROOM כקאש
-                        if (user != null) {
-                            CoroutineScope(Dispatchers.IO).launch {
-                                userDao.insertUser(user)
-                            }
-                        }
+                // שמור ל-ROOM כ-cache
+                if (user != null) {
+                    CoroutineScope(Dispatchers.IO).launch {
+                        userDao.insertUser(user)
                     }
-                    .addOnFailureListener {
-                        liveData.postValue(null)
-                    }
+                }
             }
-        }
+            .addOnFailureListener {
+                // fallback ל-ROOM אם יש כשל ב-Firestore
+                userDao.getUserById(userId).observeForever {
+                    liveData.postValue(it)
+                }
+            }
 
         return liveData
     }

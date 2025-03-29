@@ -10,12 +10,18 @@ import kotlinx.coroutines.tasks.await
 
 class UserViewModel(private val repository: UserRepository) : ViewModel() {
 
-    private val _currentUser = MutableLiveData<User?>()
+    private val _currentUser = MediatorLiveData<User?>()
     val currentUser: LiveData<User?> get() = _currentUser
 
+    private var userSource: LiveData<User?>? = null
+
     fun loadUser(userId: String) {
-        repository.getUserById(userId).observeForever { user ->
-            _currentUser.postValue(user)
+        userSource?.let { _currentUser.removeSource(it) } // הסר מקור קודם אם קיים
+
+        val newSource = repository.getUserById(userId)
+        userSource = newSource
+        _currentUser.addSource(newSource) { user ->
+            _currentUser.value = user
         }
     }
 
