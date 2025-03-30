@@ -1,6 +1,8 @@
 package com.example.tastify.ui.home
 
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.*
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -12,6 +14,7 @@ import com.example.tastify.databinding.FragmentHomeBinding
 import com.example.tastify.ui.adapters.ReviewsAdapter
 import com.example.tastify.viewmodel.ReviewViewModel
 import com.example.tastify.viewmodel.ReviewViewModelFactory
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 
 
@@ -49,7 +52,18 @@ class HomeFragment : Fragment() {
             }
         }
 
+        binding.etSearch.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
 
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                if (s.isNullOrBlank()) {
+                    reviewViewModel.clearSearch()
+                    reviewViewModel.loadAllReviews()
+                }
+            }
+
+            override fun afterTextChanged(s: Editable?) {}
+        })
 
         // כפתור הוספת ביקורת
         binding.fabAddReview.setOnClickListener {
@@ -67,23 +81,16 @@ class HomeFragment : Fragment() {
 
     private fun observeAllReviews() {
         lifecycleScope.launch {
-            reviewViewModel.allReviews.collect { all ->
-                val search = reviewViewModel.searchResults.value
-                if (search == null) {
-                    adapter.updateData(all)
-                }
-            }
-        }
-
-        lifecycleScope.launch {
-            reviewViewModel.searchResults.collect { searchResults ->
-                if (searchResults != null) {
-                    adapter.updateData(searchResults)
-                }
+            combine(
+                reviewViewModel.allReviews,
+                reviewViewModel.searchResults
+            ) { allReviews, searchResults ->
+                searchResults ?: allReviews
+            }.collect { resultToShow ->
+                adapter.updateData(resultToShow)
             }
         }
     }
-
 
 
     override fun onResume() {
